@@ -1,11 +1,11 @@
-import type { Request, Response, NextFunction } from "express";
+import type { Request, Response, NextFunction, RequestHandler} from "express";
 
 type AsyncController = (
   req: Request,
   res: Response,
   next: NextFunction
 ) => Promise<any>;
-export const errorHandler = (method: AsyncController) => {
+export const errorHandler = (method: AsyncController): RequestHandler => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       await method(req, res, next);

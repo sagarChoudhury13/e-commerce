@@ -1,4 +1,5 @@
 import type {Response, Request, NextFunction} from "express";
+import type { AuthenticatedRequest } from "../middleware/auth.ts";
 import {prismaClient} from "../index.ts";
 import {hashSync, compareSync} from "bcrypt";
 import jwt from 'jsonwebtoken';
@@ -46,4 +47,10 @@ export const login = async (req:Request , res:Response, next: NextFunction) => {
     },JWT_SECRET)
  
     res.json({user,token});
+}
+
+
+
+export const me = async (req: AuthenticatedRequest, res: Response , next: NextFunction) => {
+    res.json(req.user)
 }

@@ -22,7 +22,7 @@
 
     // Stricter Typechecking Options
     "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
+//    "exactOptionalPropertyTypes": true,
 
     // Style Options
     // "noImplicitReturns": true,
@@ -44,6 +44,6 @@
      "esModuleInterop": true,
     "ignoreDeprecations": "6.0",
     "allowImportingTsExtensions": true,
-    "noEmit": true
+    "noEmit": true,
   }
 }

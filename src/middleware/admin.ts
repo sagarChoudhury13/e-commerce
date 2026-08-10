@@ -1,10 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import { UnauthorizedException } from "../exception/unauthorized.ts";
 import { ErrorCode } from "../exception/root.ts";
-
-export interface AuthenticatedRequest extends Request {
-    user?: any
-}
+import type { AuthenticatedRequest } from "./auth.ts";
 
 const adminMiddleware = async (
     req: AuthenticatedRequest,

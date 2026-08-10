@@ -28,6 +28,9 @@ export const ErrorCode = {
   INTERNAL_EXCEPTION: 104,
   UNPROCESSABLE_ENTITY: 105,
   UNAUTHORIZED: 106,
+  PRODUCT_NOT_FOUND: 107,
+  ADDRESS_NOT_FOUND: 108,
+  ADDRESS_DOES_NOT_BELONG: 109
 } as const;
 
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];

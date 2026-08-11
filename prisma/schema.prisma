@@ -28,6 +28,7 @@ model users {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   address   address[]
+    cart cart[]
 
   @@map("users")
 }
@@ -57,6 +58,19 @@ model products{
   createAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  cart cart[]
+
   @@map("products") 
 
 } 
+
+model cart {
+  id Int @id @default(autoincrement())
+  userId Int 
+  user users @relation(fields: [userId], references: [id])
+  productId Int
+  products products @relation(fields: [productId], references: [id])
+  quantity Int
+  createAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

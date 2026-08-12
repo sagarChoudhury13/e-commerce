@@ -4,6 +4,7 @@ import { productSchema } from "../schema/products.ts";
 import { UnprocessableEntity } from "../exception/validation.ts";
 import { NotFoundException } from "../exception/not-found.ts";
 import { ErrorCode } from "../exception/root.ts";
+import type { AuthenticatedRequest } from "../middleware/auth.ts";
 
 
 export const createProducts = async(req: Request, res:Response) => {
@@ -59,7 +60,6 @@ export const listProducts = async(req:Request, res:Response)=>{
 }
 
 export const getProductById = async(req:Request, res:Response) =>{
-
     try{
         const productId = Number(req.params.id);
         const product = await prismaClient.products.findFirstOrThrow({where: {id : productId }})
@@ -68,4 +68,26 @@ export const getProductById = async(req:Request, res:Response) =>{
     catch(err:any){
         throw new NotFoundException("Product Unavailable",ErrorCode.PRODUCT_NOT_FOUND);
     }
+}
+
+
+export const searchItem = async(req: AuthenticatedRequest, res: Response) =>{
+    let searchItem = req.query.q?.toString().trim();
+
+    if (!searchItem) {
+    return res.json([]);
+  }
+
+    const retrievedProducts = await prismaClient.products.findMany({
+        where: {
+      OR: [
+        { name: { contains: searchItem, mode: 'insensitive' } },
+        { description: { contains: searchItem, mode: 'insensitive' } },
+        { tags: { contains: searchItem, mode: 'insensitive' } },
+      ],
+    },
+        skip: Number(req.query.skip) || 0,
+        take: 5
+    })
+    res.json(retrievedProducts)
 }

@@ -4,7 +4,7 @@ import { ErrorCode } from "../exception/root.ts";
 import { UnprocessableEntity } from "../exception/validation.ts";
 import type { AuthenticatedRequest } from "../middleware/auth.ts";
 import type { Response } from "express";
-import { addressSchema, updateUserSchema } from "../schema/users.ts";
+import { addressSchema, changeRoleSchema, updateUserSchema } from "../schema/users.ts";
 import type { address } from "../../generated/prisma/browser.ts";
 import { BadRequestException } from "../exception/bad-request.ts";
 
@@ -99,4 +99,51 @@ export const updateUser = async(req:AuthenticatedRequest, res: Response)=>{
     })
 
     res.json(updateUser);
+}
+
+export const listUsers = async(req: AuthenticatedRequest, res: Response)=> {
+    const users = await prismaClient.users.findMany({
+        skip : Number(req.query.skip) || 0,
+        take: 10
+    })
+    res.json(users);
+}
+
+export const getUserById = async(req:AuthenticatedRequest, res:Response)=>{
+    try{
+        const user = await prismaClient.users.findFirstOrThrow(
+            {
+                where: {
+                    id: Number(req.params.id)
+                },
+                include: {
+                    address: true
+                }
+            }
+        )
+    }catch(err:any){
+        throw new NotFoundException("User not found", ErrorCode.USER_NOT_FOUND)
+    }
+}
+
+export const changeUserRole = async(req:AuthenticatedRequest, res:Response)=>{
+
+    const validateData = changeRoleSchema.safeParse(req.body);
+    if(!validateData.success){
+        throw new UnprocessableEntity("Input Invalid", ErrorCode.UNPROCESSABLE_ENTITY, validateData.error.issues)
+    } 
+    try{
+        const user = await prismaClient.users.update(
+            {
+                where: {
+                    id: Number(req.params.id)
+                },
+                data: {
+                    role: req.body
+                }
+            }
+        )
+    }catch(err:any){
+        throw new NotFoundException("User not found", ErrorCode.USER_NOT_FOUND)
+    }
 }

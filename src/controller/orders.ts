@@ -73,7 +73,7 @@ export const createOrder = async (req: AuthenticatedRequest, res: Response) => {
 } 
 
 
-export const listAllOrders = async(req: AuthenticatedRequest, res: Response) =>{
+export const listOrders = async(req: AuthenticatedRequest, res: Response) =>{
    
     const orders = await prismaClient.order.findMany({
         where: {
@@ -136,5 +136,72 @@ export const getOrderById = async(req:AuthenticatedRequest, res: Response)=> {
     res.json(order)
     }catch(err:any){
         throw new NotFoundException("No order of this id", ErrorCode.ORDER_NOT_FOUND)
+    }
+}
+
+export const listAllOrdersByStatus = async(req:AuthenticatedRequest, res: Response)=>{
+    let whereClause = {}
+    const status = req.params.status
+    if(status){
+        whereClause = {
+            status
+        }
+    }
+    try{
+        const orders = await prismaClient.order.findMany({
+            where: whereClause,
+            skip : Number(req.query.skip) || 0,
+            take: 5
+        })
+    }catch(err:any){
+        throw new NotFoundException(`No orders found by status: ${status}`, ErrorCode.ORDER_NOT_FOUND);
+    }
+}
+
+export const changeStatus = async(req: AuthenticatedRequest, res: Response)=> {
+    return await prismaClient.$transaction(async(tx)=>{
+         try{
+        const order = await tx.order.update({
+            where: {
+                id: Number(req.params.id)
+            },
+            data: {
+                status: req.body.status
+            }
+        })
+
+        await tx.orderEvent.create({
+            data: {
+                orderId: Number(req.params.id),
+                status: req.body.status
+            }
+        })
+
+        res.json(order)
+   
+    }catch(err:any){
+        throw new NotFoundException("No order of this id", ErrorCode.ORDER_NOT_FOUND)
+    }
+    })
+    
+}
+
+export const listUserOrders = async(req: AuthenticatedRequest, res: Response)=> {
+    let whereClause: any = {userId: Number(req.params.id)}
+    const status = req.params.status
+    if(status){
+        whereClause = {
+            ...whereClause,
+            status
+        }
+    }
+    try{
+        const orders = await prismaClient.order.findMany({
+            where: whereClause,
+            skip : Number(req.query.skip) || 0,
+            take: 5
+        })
+    }catch(err:any){
+        throw new NotFoundException('No orders found by userId', ErrorCode.ORDER_NOT_FOUND);
     }
 }

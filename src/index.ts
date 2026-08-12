@@ -12,8 +12,33 @@ app.use(express.json());
 app.use('/api', rootRouter);  
 
 const adapter = new PrismaPg({ connectionString: DATABASE_URL });
-export const prismaClient = new PrismaClient({ adapter });
+export const prismaClient = new PrismaClient({ adapter }).$extends({
+  result: {
+    address: {
+      formattedAddress: {
+        needs: {
+          lineOne: true,
+          lineTwo: true,
+          city: true,
+          country: true,
+          pincode: true,
+        },
+      
+        compute(address) {
+          const parts = [
+            address.lineOne,
+            address.lineTwo,
+            address.city,
+            address.country,
+            address.pincode,
+          ].filter(Boolean); 
 
+          return parts.join(', ');
+        },
+      },
+    },
+  },
+});
 app.get("/", (req: Request, res: Response) => {
     res.status(200).send("Hello World!");
 });

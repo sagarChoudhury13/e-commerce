@@ -17,6 +17,14 @@ enum Role {
   USER
 }
 
+enum OrderEventStatus{
+  PENDING
+  ACCEPTED
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+}
+
 model users {
   id        Int      @id @default(autoincrement())
   name      String?    
@@ -29,6 +37,7 @@ model users {
   updatedAt DateTime @updatedAt
   address   address[]
     cart cart[]
+    order order[]
 
   @@map("users")
 }
@@ -59,6 +68,7 @@ model products{
   updatedAt DateTime @updatedAt
 
   cart cart[]
+  orderProduct  orderProduct[]
 
   @@map("products") 
 
@@ -73,4 +83,49 @@ model cart {
   quantity Int
   createAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+
+  @@map("cart")
+}
+
+
+model order {
+  id Int @id @default(autoincrement())
+  userId Int 
+  user users @relation(fields: [userId], references: [id])
+  netAmount Decimal 
+  address String
+  status OrderEventStatus @default(PENDING)
+  createAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orderProduct orderProduct[]
+  orderEvent  orderEvent[]
+
+  @@map("order")
+}
+
+model orderProduct {
+  id Int @id @default(autoincrement())
+  orderId Int 
+  order order @relation(fields: [orderId], references: [id])
+  productId Int
+  products  products  @relation(fields: [productId], references: [id])
+  quantity Int
+  createAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+
+  @@map("orderProduct")
+}
+
+model orderEvent {
+  id Int @id @default(autoincrement())
+  orderId Int 
+  order order @relation(fields: [orderId], references: [id])
+  status  OrderEventStatus  @default(PENDING)
+  createAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("orderEvent")
 }

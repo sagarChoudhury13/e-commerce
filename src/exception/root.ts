@@ -30,7 +30,9 @@ export const ErrorCode = {
   UNAUTHORIZED: 106,
   PRODUCT_NOT_FOUND: 107,
   ADDRESS_NOT_FOUND: 108,
-  ADDRESS_DOES_NOT_BELONG: 109
+  ADDRESS_DOES_NOT_BELONG: 109,
+  ORDER_NOT_FOUND: 110,
+  ORDER_ALREADY_CANCELLED : 111
 } as const;
 
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];

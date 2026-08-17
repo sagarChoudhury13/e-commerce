@@ -5,7 +5,7 @@ node_modules
 /generated/prisma
 
 
-# AI Tooling & Local Metadata
-.claude/
-.windsurf/
-skills-lock.json
+# # AI Tooling & Local Metadata
+# .claude/
+# .windsurf/
+# skills-lock.json

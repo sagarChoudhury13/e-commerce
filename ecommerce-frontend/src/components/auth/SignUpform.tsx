@@ -3,7 +3,7 @@
 import { z } from 'zod';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from 'react-hook-form';
-import { loginSchema } from './schema';
+import { SignUpSchema } from './schema';
 
 import { 
   Card, 
@@ -25,26 +25,27 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
-export function LoginForm() {
-  const form = useForm<z.infer<typeof loginSchema>>({
-    resolver: zodResolver(loginSchema),
+export function SignUpForm() {
+  const form = useForm<z.infer<typeof SignUpSchema>>({
+    resolver: zodResolver(SignUpSchema),
     mode: "onChange",
     defaultValues: {
+      name:"",
       email: "",
       password: "",
     },
   })
 
-  function onSubmit(data: z.infer<typeof loginSchema>) {
+  function onSubmit(data: z.infer<typeof SignUpSchema>) {
     console.log("Valid data ready for Express:", data)
   }
 
   return (
     <Card className="w-full p- sm:max-w-md mx-auto mt-12 shadow-lg text-card-foreground border-border bg-card gap-2">
       <CardHeader className="space-y-1 pb-6">
-        <CardTitle className="text-2xl font-bold tracking-tight">Login to your Account</CardTitle>
+        <CardTitle className="text-2xl font-bold tracking-tight">Create an account</CardTitle>
         <CardDescription className="text-muted-foreground text-sm">
-          Don't have an account? <Link href="/signup" className='text-muted-foreground hover:text-foreground transition-colors'>Sign up</Link>
+          Already have an account? <Link href="/login" className='text-muted-foreground hover:text-foreground transition-colors'>Log in</Link>
         </CardDescription>
       </CardHeader>
       
@@ -56,24 +57,21 @@ export function LoginForm() {
           <FieldGroup className="space-y-4">
             
             <Controller
-              name="email"
+              name="name"
               control={form.control}
               render={({ field, fieldState }) => (
                 
                 <Field data-invalid={fieldState.invalid} className="space-y-2">
-                  <FieldLabel htmlFor={field.name} className="text-sm font-medium leading-none">Email:</FieldLabel>
+                  <FieldLabel htmlFor={field.name} className="text-sm font-medium leading-none">Name :</FieldLabel>
                   <Input
                     {...field}
                     id={field.name}
-                    type="email"
+                    type="text"
                     aria-invalid={fieldState.invalid}
                     autoComplete="off"
-                    placeholder='Example: me@gmail.com'
+                    placeholder='Enter your name'
                     className="w-full"
                   />
-                  <FieldDescription className="text-[0.8rem] text-muted-foreground">
-                    Provide your registered email to log in.
-                  </FieldDescription>
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} className="text-[0.8rem] font-medium text-destructive" />
                   )}
@@ -81,6 +79,29 @@ export function LoginForm() {
               )}
             />
 
+            <Controller
+              name="email"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid} className="space-y-2">
+                  <FieldLabel htmlFor={field.name} className="text-sm font-medium leading-none">Password:</FieldLabel>
+                  <Input
+                    {...field}
+                    id={field.name}
+                    type="email"
+                    placeholder="Example: me@gmail.com"
+                    aria-invalid={fieldState.invalid}
+                    className="w-full"
+                  />
+                  <FieldDescription className="text-[0.8rem] text-muted-foreground">
+                    Enter your email address
+                  </FieldDescription>
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} className="text-[0.8rem] font-medium text-destructive" />
+                  )}
+                </Field>
+              )}
+            />
             <Controller
               name="password"
               control={form.control}
@@ -122,4 +143,4 @@ export function LoginForm() {
   )
 }
 
-export default LoginForm;
+export default SignUpForm;

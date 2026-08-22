@@ -9,7 +9,7 @@ function Input({ className, type, ...props }: React.ComponentProps<"input">) {
       type={type}
       data-slot="input"
       className={cn(
-        "tw-:h-9 tw-:w-full tw-:min-w-0 tw-:rounded-3xl tw-:border tw-:border-transparent tw-:bg-input/50 tw-:px-3 tw-:py-1 tw-:text-base tw-:transition-[color,box-shadow,background-color] tw-:outline-none tw-:file:inline-flex tw-:file:h-7 tw-:file:border-0 tw-:file:bg-transparent tw-:file:text-sm tw-:file:font-medium tw-:file:text-foreground tw-:placeholder:text-muted-foreground tw-:focus-visible:border-ring tw-:focus-visible:ring-3 tw-:focus-visible:ring-ring/30 tw-:disabled:pointer-events-none tw-:disabled:cursor-not-allowed tw-:disabled:opacity-50 tw-:aria-invalid:border-destructive tw-:aria-invalid:ring-3 tw-:aria-invalid:ring-destructive/20 tw-:md:text-sm tw-:dark:aria-invalid:border-destructive/50 tw-:dark:aria-invalid:ring-destructive/40",
+        "h-9 w-full min-w-0 rounded-3xl border border-transparent bg-input/50 px-3 py-1 text-base transition-[color,box-shadow,background-color] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 md:text-sm dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40",
         className
       )}
       {...props}

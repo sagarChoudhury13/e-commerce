@@ -62,6 +62,7 @@ model address {
 model products{
   id Int @id @default(autoincrement())
   name String 
+  image_url String?
   description String @db.Text
   price Decimal
   tags String

@@ -5,10 +5,17 @@ import rootRouter from "./routes/index.ts";
 import {PrismaPg} from "@prisma/adapter-pg";
 import {PrismaClient} from "../generated/prisma/client.ts";
 import { errorMiddleware } from "./middleware/error.ts";
+import cors from 'cors';
 
 const app : Express = express();
 
 app.use(express.json());
+app.use(cors({
+  origin: ['http://localhost:3000'], // Next.js dev server URL
+    credentials: true,                 // Allows cookies/auth headers
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+}))
 app.use('/api', rootRouter);  
 
 const adapter = new PrismaPg({ connectionString: DATABASE_URL });
@@ -38,9 +45,6 @@ export const prismaClient = new PrismaClient({ adapter }).$extends({
       },
     },
   },
-});
-app.get("/", (req: Request, res: Response) => {
-    res.status(200).send("Hello World!");
 });
 
 app.use(errorMiddleware);

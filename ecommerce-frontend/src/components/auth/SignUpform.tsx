@@ -36,9 +36,42 @@ export function SignUpForm() {
     },
   })
 
-  function onSubmit(data: z.infer<typeof SignUpSchema>) {
-    console.log("Valid data ready for Express:", data)
+  async function onSubmit(data: z.infer<typeof SignUpSchema>) {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/signup`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json", 
+      },
+      
+      body: JSON.stringify({
+        name: data.name, 
+        email: data.email,
+        password: data.password,
+      }) 
+    });
+
+    if (!response.ok) {
+      // It's helpful to parse the error so you know exactly why it failed (e.g., "Email already exists")
+      const errorResponse = await response.json();
+      console.error("Signup failed:", errorResponse.message);
+      
+      return; // CRITICAL: This stops the function from continuing
+    }
+
+    // FIX: Destructure the response directly instead of naming it 'data' again
+    // Assuming your Express server sends back { message, user, token }
+    const {  } = await response.json();
+
+    console.log("Signup successful!", message);
+    console.log("New user created:", user.email);
+
+    // Next Steps: Save the token and redirect the user
+
+  } catch (err) {
+    console.error("Network error. Is the Express server running?", err);
   }
+}
 
   return (
     <Card className="w-full p- sm:max-w-md mx-auto mt-12 shadow-lg text-card-foreground border-border bg-card gap-2">
@@ -84,7 +117,7 @@ export function SignUpForm() {
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid} className="space-y-2">
-                  <FieldLabel htmlFor={field.name} className="text-sm font-medium leading-none">Password:</FieldLabel>
+                  <FieldLabel htmlFor={field.name} className="text-sm font-medium leading-none">Email :</FieldLabel>
                   <Input
                     {...field}
                     id={field.name}
@@ -117,7 +150,7 @@ export function SignUpForm() {
                     className="w-full"
                   />
                   <FieldDescription className="text-[0.8rem] text-muted-foreground">
-                    Enter password to this account
+                    Create a strong password 
                   </FieldDescription>
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} className="text-[0.8rem] font-medium text-destructive" />

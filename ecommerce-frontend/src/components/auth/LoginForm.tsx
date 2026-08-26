@@ -4,7 +4,8 @@ import { z } from 'zod';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from 'react-hook-form';
 import { loginSchema } from './schema';
-
+import { useRouter } from 'next/navigation';
+import { toast } from '@/components/ui/toast';
 import { 
   Card, 
   CardAction, 
@@ -24,8 +25,13 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { useErrorToast } from '@/hooks/error-toast';
 
 export function LoginForm() {
+
+  const router = useRouter();
+  const {showErrorToast} = useErrorToast();
+
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     mode: "onChange",
@@ -35,12 +41,51 @@ export function LoginForm() {
     },
   })
 
-  function onSubmit(data: z.infer<typeof loginSchema>) {
-    console.log("Valid data ready for Express:", data)
+
+  async function onSubmit(data: z.infer<typeof loginSchema>) {
+    try {
+    const loginResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json", 
+      },
+      body: JSON.stringify({
+        email: data.email,
+        password: data.password,
+      }) 
+    })
+    if(!loginResponse.ok){
+      const errorData = await loginResponse.json()
+      throw new Error(JSON.stringify({ 
+          code: errorData.errorCode, 
+          message: errorData.message 
+        }));
+    }
+
+    const {token, user} = await loginResponse.json();
+    console.log(user)
+    localStorage.setItem("token", token)
+    toast.add({
+      type: "success",
+      title: "Access Granted",
+      description: "Redirecting to home page ...."
+    })
+    router.push("/")
+    
+  } catch (err:any)
+    {
+      try {
+          const parsedError = JSON.parse(err.message);
+          showErrorToast(parsedError.code, parsedError.message);
+        } catch {
+          showErrorToast(undefined, "Network error. Is the server running?");
+        }
+    }
   }
 
   return (
-    <Card className="w-full p- sm:max-w-md mx-auto mt-12 shadow-lg text-card-foreground border-border bg-card gap-2">
+    
+    <Card className="w-full sm:max-w-md mx-auto mt-12 shadow-lg text-card-foreground border-border bg-card gap-2">
       <CardHeader className="space-y-1 pb-6">
         <CardTitle className="text-2xl font-bold tracking-tight">Login to your Account</CardTitle>
         <CardDescription className="text-muted-foreground text-sm">
@@ -49,17 +94,13 @@ export function LoginForm() {
       </CardHeader>
       
       <CardContent>
-        {/* space-y-6 creates consistent vertical gaps between form sections */}
         <form id="form-rhf-demo" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          
-          {/* space-y-4 creates the gap between the Email and Password fields */}
           <FieldGroup className="space-y-4">
             
             <Controller
               name="email"
               control={form.control}
               render={({ field, fieldState }) => (
-                
                 <Field data-invalid={fieldState.invalid} className="space-y-2">
                   <FieldLabel htmlFor={field.name} className="text-sm font-medium leading-none">Email:</FieldLabel>
                   <Input
@@ -109,7 +150,6 @@ export function LoginForm() {
         </form>
       </CardContent>
 
-      {/* Added a subtle top border to separate the actions, and ensured buttons look good on mobile (w-full sm:w-auto) */}
       <CardFooter className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 pt-6 border-t border-border/50">
         <Button type="button" variant="outline" onClick={() => form.reset()} className="w-full sm:w-auto">
           Reset

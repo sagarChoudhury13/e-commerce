@@ -34,7 +34,7 @@ export const signUp = async (req:Request , res:Response,  next:NextFunction) => 
 export const login = async (req:Request , res:Response, next: NextFunction) => {
     const {email, password} = req.body;
 
-    let user = await prismaClient.users.findFirst({where: {email}});
+    let user = await prismaClient.users.findUnique({where: {email}});
     if(!user){
         throw new NotFoundException("User not found", ErrorCode.USER_NOT_FOUND);
     }   
@@ -46,11 +46,16 @@ export const login = async (req:Request , res:Response, next: NextFunction) => {
         userId: user!.id
     },JWT_SECRET)
  
-    res.json({user,token});
+    res.json({ 
+  message: "Login successful", 
+  token: token, 
+  user: { id: user.id, email: user.email } 
+});
 }
 
 
 
 export const me = async (req: AuthenticatedRequest, res: Response , next: NextFunction) => {
+    
     res.json(req.user)
 }

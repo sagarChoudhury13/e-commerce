@@ -21,8 +21,7 @@ export const createProducts = async (req: Request, res: Response) => {
     });
     imageUrl = uploadResult.secure_url;
   }
-
-  // 2. Validate the request body using Zod
+  
   const payload = productSchema.safeParse(req.body);
   
   if (!payload.success) {

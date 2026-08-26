@@ -2,6 +2,7 @@ import "./globals.css";
 import { Navbar } from "@/components/layout/Navbar";
 import { Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
+import { Toaster } from "@/components/ui/toast";
 
 const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
@@ -18,6 +19,7 @@ export default function AppLayout({
         <main className="flex-1">
           {children}
         </main>
+        <Toaster/>
       </body>
     </html>
   )

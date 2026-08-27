@@ -2,13 +2,16 @@ import { User } from '@/types';
 import { create } from 'zustand';
 
 interface AuthState {
-  user: User | null; // Replace 'any' with your User type
+  user: User | null; 
   setUser: (user: User| null) => void;
   logout: () => void;
 }
 
-export const useAuthStore = create((set) => ({
+export const useAuthStore = create<AuthState>((set) => ({
   user: null,
-  setUser: (user: User) => set({ user }),
-  logout: () => set({ user: null }),
+  setUser: (user) => set({ user }),
+  logout: () => {
+    localStorage.removeItem("token");
+    set({ user: null });
+  },
 }));

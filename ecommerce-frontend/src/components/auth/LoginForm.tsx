@@ -26,11 +26,13 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useErrorToast } from '@/hooks/error-toast';
+import { useAuthStore } from '@/store/useAuthStore';
 
 export function LoginForm() {
 
   const router = useRouter();
   const {showErrorToast} = useErrorToast();
+  const setUser = useAuthStore((state) => state.setUser);
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -64,6 +66,7 @@ export function LoginForm() {
 
     const {token, user} = await loginResponse.json();
     localStorage.setItem("token", token)
+    setUser(user);
     toast.add({
       type: "success",
       title: `Hi ${user.name}!`,

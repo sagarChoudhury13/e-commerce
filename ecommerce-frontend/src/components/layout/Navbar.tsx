@@ -3,14 +3,53 @@
 import Link from "next/link";
 import {useState, useRef, useEffect} from 'react';
 import { ShoppingCart, Package } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {UserDropdown} from "./UserDropdown"
 import {SearchBar} from './Search'
+import { useRouter } from 'next/navigation';
+import { useAuthStore } from "@/store/useAuthStore";
 
 
 export function Navbar() {
+  const router = useRouter();
+  const { user, setUser, logout } = useAuthStore();
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchUser() {
+      const token = localStorage.getItem("token");
+      
+      if (!token) {
+        setIsAuthLoading(false);
+        return;
+      }
+
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/me`, {
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          setUser(data); 
+        } else {         
+          logout();
+        }
+      } catch (error: any) {
+        console.error("Failed to fetch user : wrong token?");
+      } finally {
+        setIsAuthLoading(false);
+      }
+    }
+
+    fetchUser();
+  }, [setUser, logout]);
+  
+
   
   return (
-   <nav className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+   <nav className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
       <div className="container mx-auto flex h-16 items-center justify-between px-4 lg:px-6">
         
         {/* Left Side: Brand & Main Links */}
@@ -44,17 +83,8 @@ export function Navbar() {
             <ShoppingCart className="h-5 w-5" />
             <span className="hidden sm:inline">Cart</span>
           </Link>
-
           {/* Avatar */}
-          <Link href="/account" className="ml-2">
-            <Avatar className="h-8 w-8 border border-border hover:opacity-80 transition-opacity">
-              <AvatarImage src="https://github.com/shadcn.png" alt="Profile" />
-              <AvatarFallback className="bg-primary text-primary-foreground">
-                U
-              </AvatarFallback>
-            </Avatar>
-          </Link>
-
+          <UserDropdown/>
         </div>
       </div>
     </nav>

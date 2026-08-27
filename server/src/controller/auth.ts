@@ -27,7 +27,17 @@ export const signUp = async (req:Request , res:Response,  next:NextFunction) => 
             password : hashSync(password, 10)
         }
     })
-    res.json(user);
+
+    const token = jwt.sign({
+        userId: user!.id
+    },JWT_SECRET,{ expiresIn: "7d" } )
+
+
+    res.status(201).json({
+      message: "Account created successfully",
+      token: token,
+      user: { id: user.id, name: user.name, email: user.email }
+    })
 }
 
 
@@ -44,7 +54,7 @@ export const login = async (req:Request , res:Response, next: NextFunction) => {
 
     const token = jwt.sign({
         userId: user!.id
-    },JWT_SECRET)
+    },JWT_SECRET, { expiresIn: "7d" })
  
     res.json({ 
   message: "Login successful", 

@@ -4,7 +4,9 @@ import { z } from 'zod';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from 'react-hook-form';
 import { SignUpSchema } from './schema';
-
+import { useErrorToast } from '@/hooks/error-toast';
+import { useRouter } from 'next/navigation';
+import {toast} from "@/components/ui/toast"
 import { 
   Card, 
   CardAction, 
@@ -26,6 +28,8 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
 export function SignUpForm() {
+  const router = useRouter();
+  const {showErrorToast} = useErrorToast()
   const form = useForm<z.infer<typeof SignUpSchema>>({
     resolver: zodResolver(SignUpSchema),
     mode: "onChange",
@@ -38,7 +42,7 @@ export function SignUpForm() {
 
   async function onSubmit(data: z.infer<typeof SignUpSchema>) {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/signup`, {
+    const signUpRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/signup`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json", 
@@ -51,25 +55,32 @@ export function SignUpForm() {
       }) 
     });
 
-    if (!response.ok) {
-      // It's helpful to parse the error so you know exactly why it failed (e.g., "Email already exists")
-      const errorResponse = await response.json();
-      console.error("Signup failed:", errorResponse.message);
-      
-      return; // CRITICAL: This stops the function from continuing
+    if (!signUpRes.ok) {
+      const errorResponse = await signUpRes.json();
+      throw new Error(JSON.stringify({ 
+          code: errorResponse.errorCode, 
+          message: errorResponse.message 
+        }));
     }
+    const {message, token , user} = await signUpRes.json();
 
-    // FIX: Destructure the response directly instead of naming it 'data' again
-    // Assuming your Express server sends back { message, user, token }
-    const {  } = await response.json();
+    localStorage.setItem("token" , token);
 
-    console.log("Signup successful!", message);
-    console.log("New user created:", user.email);
+    toast.add({
+      title: "Welcome to SHOP XYZ!",
+      description: `Account created for ${user.email}. Redirecting...`,
+    });
 
-    // Next Steps: Save the token and redirect the user
+    router.push("/")
+    
 
-  } catch (err) {
-    console.error("Network error. Is the Express server running?", err);
+  } catch (err: any) {
+    try {
+          const parsedError = JSON.parse(err.message);
+          showErrorToast(parsedError.code, parsedError.message);
+        } catch {
+          showErrorToast(undefined, "Network error. Is the server running?");
+        }
   }
 }
 

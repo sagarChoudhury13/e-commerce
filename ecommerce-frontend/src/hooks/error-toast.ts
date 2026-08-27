@@ -51,18 +51,18 @@ const ERROR_MESSAGE: Record<string | number, { title: string; description: strin
 export function useErrorToast() {
 
   const showErrorToast = (errorCode?: string | number, defaultMessage?: string) => {
-    // Look up the error code in our dictionary
+    
     const errorData = errorCode ? ERROR_MESSAGE[errorCode] : null;
 
     if (errorData) {
-      // If we recognize the code, show the specific message
+
       toast.add({
         type: "error",
         title: errorData.title,
         description: errorData.description,
       });
     } else {
-      // If it's a code we haven't mapped yet, show a generic fallback
+      
       toast.add({
         type: "error",
         title: "Something went wrong",

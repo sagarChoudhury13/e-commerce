@@ -63,11 +63,10 @@ export function LoginForm() {
     }
 
     const {token, user} = await loginResponse.json();
-    console.log(user)
     localStorage.setItem("token", token)
     toast.add({
       type: "success",
-      title: "Access Granted",
+      title: `Hi ${user.name}!`,
       description: "Redirecting to home page ...."
     })
     router.push("/")

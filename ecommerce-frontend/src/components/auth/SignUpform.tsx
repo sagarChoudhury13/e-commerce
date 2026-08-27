@@ -26,10 +26,12 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { useAuthStore } from '@/store/useAuthStore';
 
 export function SignUpForm() {
   const router = useRouter();
-  const {showErrorToast} = useErrorToast()
+  const {showErrorToast} = useErrorToast();
+  const setUser = useAuthStore((state) => state.setUser);
   const form = useForm<z.infer<typeof SignUpSchema>>({
     resolver: zodResolver(SignUpSchema),
     mode: "onChange",
@@ -65,6 +67,7 @@ export function SignUpForm() {
     const {message, token , user} = await signUpRes.json();
 
     localStorage.setItem("token" , token);
+    setUser(user);
 
     toast.add({
       title: "Welcome to SHOP XYZ!",

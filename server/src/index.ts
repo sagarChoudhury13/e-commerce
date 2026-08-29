@@ -6,6 +6,7 @@ import {PrismaPg} from "@prisma/adapter-pg";
 import {PrismaClient} from "../generated/prisma/client.ts";
 import { errorMiddleware } from "./middleware/error.ts";
 import cors from 'cors';
+import {Pool} from 'pg'
 
 const app : Express = express();
 
@@ -18,7 +19,7 @@ app.use(cors({
 }))
 app.use('/api', rootRouter);  
 
-const adapter = new PrismaPg({ connectionString: DATABASE_URL });
+const adapter = new PrismaPg(new Pool ({ connectionString: DATABASE_URL }));
 export const prismaClient = new PrismaClient({ adapter }).$extends({
   result: {
     address: {

@@ -1,6 +1,7 @@
 import { ShoppingCart } from "lucide-react";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardFooter } from "../ui/card";
+import { useEffect } from "react";
 
 export type Product = {
   id: string;
@@ -10,7 +11,16 @@ export type Product = {
   image: string;
 };
 
-export function ProductCard({ product }: { product: Product }) {
+
+export function ProductCard( ) {
+
+  useEffect(()=>{
+  async function fetchProducts (){
+   // const products =fetch(`${process.env.NEXT_PUBLIC_API_URL}/products`,
+  } 
+},[])
+
+
   return (
     <Card className="group overflow-hidden border-border flex flex-col h-full transition-all hover:border-primary/50 hover:shadow-md">
       {/* Image Container */}

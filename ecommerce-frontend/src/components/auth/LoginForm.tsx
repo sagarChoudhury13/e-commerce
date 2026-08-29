@@ -64,9 +64,10 @@ export function LoginForm() {
         }));
     }
 
-    const {token, user} = await loginResponse.json();
+    const {token, user, message} = await loginResponse.json();
     localStorage.setItem("token", token)
     setUser(user);
+    console.log(message);
     toast.add({
       type: "success",
       title: `Hi ${user.name}!`,

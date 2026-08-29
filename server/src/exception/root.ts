@@ -32,7 +32,8 @@ export const ErrorCode = {
   ADDRESS_NOT_FOUND: 108,
   ADDRESS_DOES_NOT_BELONG: 109,
   ORDER_NOT_FOUND: 110,
-  ORDER_ALREADY_CANCELLED : 111
+  ORDER_ALREADY_CANCELLED : 111,
+  IMAGE_FILE_INVALID : 112
 } as const;
 
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];

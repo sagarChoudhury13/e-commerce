@@ -68,7 +68,7 @@ export function SignUpForm() {
 
     localStorage.setItem("token" , token);
     setUser(user);
-
+    console.log(message)
     toast.add({
       title: "Welcome to SHOP XYZ!",
       description: `Account created for ${user.email}. Redirecting...`,

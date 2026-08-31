@@ -22,12 +22,12 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
     const { name, price, description, tags , image_url} = req.body;
     
     // 1. Ensure a file was actually uploaded
-    if (!req.file && !image_url) {
+    if (!req.file) {
       return res.status(400).json({ message: "Product image is required" });
     }
 
     // 2. Upload the file buffer to Cloudinary
-    if(!image_url){
+   
     const uploadStream = cloudinary.uploader.upload_stream(
       { folder: "ecommerce_products" }, // Organizes images in your Cloudinary dashboard
       async (error, result) => {
@@ -50,17 +50,8 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
     );
     // Pipe the memory buffer into the Cloudinary upload stream
     streamifier.createReadStream(req.file!.buffer).pipe(uploadStream);
-  }
-  const newProduct = await prismaClient.products.create({
-          data: {
-            name,
-            price: Number(price),
-            tags,
-            description,
-            image_url 
-          }
-        });
-        res.json(newProduct)
+  
+  
   } catch (error) {
     next(error);
   }

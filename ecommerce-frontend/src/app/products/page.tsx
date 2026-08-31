@@ -1,22 +1,32 @@
 import { ProductGrid } from "@/components/products/ProductGrid";
+import { Product } from "@/types";
 
 // Fetch directly inside the component
-export default async function ProductsPage() {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products`, {
+async function getProducts() {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products`, {
     // 'no-store' ensures it fetches fresh data from Postgres every time
     cache: "no-store", 
   });
 
-  if (!response.ok) {
-    return <div>Failed to load products</div>;
+  if (!response.ok) return [];
+
+  const {count , data } = await response.json();
+
+  return (data);
+  
   }
 
-  const products = await response.json();
+  export default async function ProductsPage() {
+
+  const products = await getProducts();
 
   return (
-    <div className="container mx-auto py-10">
-      <h1 className="text-3xl font-bold mb-8">All Products</h1>
-      {/* Pass the data from Express directly into your grid component */}
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-3xl font-bold tracking-tight">All Products</h1>
+      </div>
+      
+      {/* Drop in the reusable grid */}
       <ProductGrid products={products} />
     </div>
   );

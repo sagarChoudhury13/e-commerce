@@ -14,7 +14,7 @@ productsRoutes.put('/:id', [authMiddleware, adminMiddleware],upload.single("imag
 
 productsRoutes.delete('/:id', [authMiddleware, adminMiddleware], errorHandler(deleteProduct));
 
-productsRoutes.get('/', [authMiddleware], errorHandler(listProducts));
+productsRoutes.get('/', errorHandler(listProducts));
 
 productsRoutes.get('/search',[authMiddleware], errorHandler(searchItem))
 

@@ -1,56 +1,50 @@
-import { ShoppingCart } from "lucide-react";
+"use client"
+
+import { ShoppingCart, ImageIcon } from "lucide-react";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardFooter } from "../ui/card";
-import { useEffect } from "react";
-
-export type Product = {
-  id: string;
-  name: string;
-  price: number;
-  category: string;
-  image: string;
-};
+import type { Product } from "@/types";
+import Image from "next/image";
 
 
-export function ProductCard( ) {
-
-  useEffect(()=>{
-  async function fetchProducts (){
-   // const products =fetch(`${process.env.NEXT_PUBLIC_API_URL}/products`,
-  } 
-},[])
 
 
+export function ProductCard({product}: {product : Product} ) {
+  const handleAddToCart = () => {
+    console.log(`Added ${product.name} to cart`);
+  };
   return (
-    <Card className="group overflow-hidden border-border flex flex-col h-full transition-all hover:border-primary/50 hover:shadow-md">
-      {/* Image Container */}
-      <div className="relative aspect-square overflow-hidden bg-muted">
-        {/* For this example we use a standard <img>. In production, use Next.js <Image> */}
-        <img 
-          src={product.image} 
-          alt={product.name}
-          className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
-        />
+    <Card className="overflow-hidden flex flex-col group border-border">
+      <div className="relative aspect-square overflow-hidden bg-muted flex items-center justify-center">
+        {product.image_url ? (
+          <Image
+            src={product.image_url}
+            alt={product.name}
+            fill
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+          />
+        ) : (
+          <ImageIcon className="h-12 w-12 text-muted-foreground/50" />
+        )}
       </div>
 
       <CardContent className="p-4 flex-1">
-        <p className="text-xs text-muted-foreground mb-2 uppercase tracking-wider">
-          {product.category}
-        </p>
-        <h3 className="font-semibold text-lg tracking-tight line-clamp-2">
+        <h3 className="font-semibold text-lg line-clamp-2 mb-1 group-hover:text-primary transition-colors">
           {product.name}
         </h3>
+        <p className="text-xl font-bold text-foreground">
+          ₹{product.price.toLocaleString("en-IN")}
+        </p>
       </CardContent>
-
-      <CardFooter className="p-4 pt-0 flex items-center justify-between gap-4">
-        <span className="font-bold text-lg">
-          ${product.price.toFixed(2)}
-        </span>
-        <Button size="sm" className="w-full sm:w-auto shrink-0">
-          <ShoppingCart className="h-4 w-4 mr-2" />
-          Add
+      <CardFooter className="p-4 pt-0">
+        <Button onClick={handleAddToCart} className="w-full" variant="default">
+          <ShoppingCart className="mr-2 h-4 w-4" />
+          Add to Cart
         </Button>
       </CardFooter>
     </Card>
   );
 }
+
+export default ProductCard

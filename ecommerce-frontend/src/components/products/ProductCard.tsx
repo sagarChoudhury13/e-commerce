@@ -1,18 +1,38 @@
 "use client"
 
-import { ShoppingCart, ImageIcon } from "lucide-react";
-import { Button } from "../ui/button";
-import { Card, CardContent, CardFooter } from "../ui/card";
-import type { Product } from "@/types";
 import Image from "next/image";
+import { ShoppingCart, ImageIcon, Plus, Minus } from "lucide-react";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import type { Product } from "@/types/index";
+import { useCartStore } from "@/store/useCartStore";
+import { useErrorToast } from "@/hooks/error-toast";
+import { useAuthStore } from "@/store/useAuthStore";
+import { toast } from "../ui/toast";
 
+export function ProductCard({ product }: { product: Product }) {
+  // Connect directly to Zustand
+  const user = useAuthStore((state)=> state.user)
+  const items = useCartStore((state) => state.items);
+  const updateQuantity = useCartStore((state) => state.updateQuantity);
+  
+  // Call the toast hook safely inside the React component
+  const { showErrorToast } = useErrorToast();
+  
+  // Get the current quantity for this specific product, default to 0
+  const quantity = items[product.id] || 0;
 
-
-
-export function ProductCard({product}: {product : Product} ) {
-  const handleAddToCart = () => {
-    console.log(`Added ${product.name} to cart`);
+  const handleUpdate = (newQuantity: number) => {
+    if(!user){
+      return (toast.add({
+        type: "error",
+        title: "No account found",
+        description: "Please log in to buy products.",
+      }))
+    }
+    updateQuantity(product.id, newQuantity, showErrorToast);
   };
+
   return (
     <Card className="overflow-hidden flex flex-col group border-border">
       <div className="relative aspect-square overflow-hidden bg-muted flex items-center justify-center">
@@ -37,14 +57,39 @@ export function ProductCard({product}: {product : Product} ) {
           ₹{product.price.toLocaleString("en-IN")}
         </p>
       </CardContent>
+      
       <CardFooter className="p-4 pt-0">
-        <Button onClick={handleAddToCart} className="w-full" variant="default">
-          <ShoppingCart className="mr-2 h-4 w-4" />
-          Add to Cart
-        </Button>
+        {quantity === 0 ? (
+          <Button onClick={() => handleUpdate(1)} className="w-full" variant="default">
+            <ShoppingCart className="mr-2 h-4 w-4" />
+            Add to Cart
+          </Button>
+        ) : (
+          <div className="flex items-center justify-between w-full h-10 border border-input rounded-md overflow-hidden bg-background">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-full w-10 rounded-none hover:bg-muted"
+              onClick={() => handleUpdate(quantity - 1)}
+            >
+              <Minus className="h-4 w-4" />
+            </Button>
+            
+            <span className="font-semibold text-sm flex-1 text-center select-none">
+              {quantity}
+            </span>
+            
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-full w-10 rounded-none hover:bg-muted"
+              onClick={() => handleUpdate(quantity + 1)}
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
       </CardFooter>
     </Card>
   );
 }
-
-export default ProductCard

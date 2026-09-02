@@ -27,22 +27,20 @@ export const addItemToCart = async(req:AuthenticatedRequest, res:Response)=>{
         throw new NotFoundException("Product not found", ErrorCode.PRODUCT_NOT_FOUND);
     }
 
-    const cartItems = await prismaClient.cart.findFirst({
+    const cartItem = await prismaClient.cart.findFirst({
         where: {
             productId: product.id,
             userId: req.user.id
         }
     })
 
-    if(cartItems){
+    if(cartItem){
         const updatedCart = await prismaClient.cart.update({
             where: {
-                id: cartItems.id
+                id: cartItem.id
             },
             data: {
-                quantity: {
-          increment: validateData.data.quantity,
-        },
+                quantity: validateData.data.quantity,
             },
         });
         return res.json(updatedCart)
@@ -65,7 +63,7 @@ export const deleteCart = async(req:AuthenticatedRequest, res: Response)=>{
     try{
    await prismaClient.cart.deleteMany({
   where: {
-    id: Number(req.params.id),
+    productId: Number(req.params.id),
     userId: req.user.id,
   },
 });
@@ -84,7 +82,7 @@ export const changeQuantity = async(req: AuthenticatedRequest, res: Response)=>{
 
     const updatedData = await prismaClient.cart.updateMany({
         where: {
-            id: Number(req.params.id),
+            productId: Number(req.params.id),
             userId: req.user.id
         },
         data: {quantity: validateData.data.quantity}
@@ -95,9 +93,9 @@ export const changeQuantity = async(req: AuthenticatedRequest, res: Response)=>{
 
 
 export const getCart = async(req: AuthenticatedRequest, res: Response)=>{
-    const cart = await prismaClient.cart.findUnique({
+    const cart = await prismaClient.cart.findMany({
         where: {
-            id: Number(req.params.id)
+            userId: req.user.id
         },
         include: {
             products: true

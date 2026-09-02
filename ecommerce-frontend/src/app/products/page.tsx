@@ -1,6 +1,7 @@
 import { ProductGrid } from "@/components/products/ProductGrid";
 import { Product } from "@/types";
 import { ProductPagination }  from  '@/components/products/ProductPagination'
+import { CartInitializer } from "@/components/products/CartInitializer";
 
 
 const ITEMS_PER_PAGE = 6;
@@ -47,7 +48,7 @@ export default async function ProductsPage({
   const totalPages = Math.ceil(count / ITEMS_PER_PAGE);
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8"><CartInitializer />
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold tracking-tight">All Products</h1>
       </div>

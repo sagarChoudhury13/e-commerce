@@ -10,8 +10,8 @@ cartRoutes.post('/', [authMiddleware], errorHandler(addItemToCart));
 
 cartRoutes.delete('/:id',[authMiddleware], errorHandler(deleteCart));
 
-cartRoutes.put('/id', [authMiddleware], errorHandler(changeQuantity));
+cartRoutes.put('/:id', [authMiddleware], errorHandler(changeQuantity));
 
-cartRoutes.get('/:id', [authMiddleware], errorHandler(getCart));
+cartRoutes.get('/', [authMiddleware], errorHandler(getCart));
 
 export default cartRoutes;

@@ -10,17 +10,20 @@ import { useErrorToast } from "@/hooks/error-toast";
 import { useAuthStore } from "@/store/useAuthStore";
 import { toast } from "../ui/toast";
 
+
 export function ProductCard({ product }: { product: Product }) {
   // Connect directly to Zustand
   const user = useAuthStore((state)=> state.user)
-  const items = useCartStore((state) => state.items);
   const updateQuantity = useCartStore((state) => state.updateQuantity);
+  const addToCart = useCartStore((state) => state.addToCart);
+  const clearCartItem = useCartStore((state) => state.clearCartItem);
+   const items = useCartStore((state) => state.items);
   
   // Call the toast hook safely inside the React component
   const { showErrorToast } = useErrorToast();
   
-  // Get the current quantity for this specific product, default to 0
-  const quantity = items[product.id] || 0;
+const cartItem = items.find((item) => Number(item.productId) === Number(product.id));
+  const quantity = cartItem ? cartItem.quantity : 0;
 
   const handleUpdate = (newQuantity: number) => {
     if(!user){
@@ -30,7 +33,16 @@ export function ProductCard({ product }: { product: Product }) {
         description: "Please log in to buy products.",
       }))
     }
-    updateQuantity(product.id, newQuantity, showErrorToast);
+
+    if(newQuantity === 0){
+      return clearCartItem(product.id, showErrorToast);
+    }
+
+   if(!cartItem){
+      
+      return addToCart(product, showErrorToast); 
+    }
+    return updateQuantity(product.id, newQuantity, showErrorToast);
   };
 
   return (

@@ -1,7 +1,7 @@
 import { ProductGrid } from "@/components/products/ProductGrid";
 import { Product } from "@/types";
 import { ProductPagination }  from  '@/components/products/ProductPagination'
-import { CartInitializer } from "@/components/products/CartInitializer";
+import { CartInitializer } from "@/components/cart/CartInitializer";
 
 
 const ITEMS_PER_PAGE = 6;

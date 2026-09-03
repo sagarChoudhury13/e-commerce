@@ -7,19 +7,21 @@ import {UserDropdown} from "./UserDropdown"
 import {SearchBar} from './Search'
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from "@/store/useAuthStore";
+import { useCartStore } from "@/store/useCartStore";
 
 
 export function Navbar() {
   const router = useRouter();
   const { user, setUser, logout } = useAuthStore();
   const [isAuthLoading, setIsAuthLoading] = useState(true);
-
+  const { clearCart } = useCartStore();
   useEffect(() => {
     async function fetchUser() {
       const token = localStorage.getItem("token");
       
       if (!token) {
         setIsAuthLoading(false);
+        clearCart();
         return;
       }
 
@@ -37,7 +39,7 @@ export function Navbar() {
           logout();
         }
       } catch (error: any) {
-        console.error("Failed to fetch user : wrong token?");
+        console.log("Error fetching user/ no token found:" );
       } finally {
         setIsAuthLoading(false);
       }

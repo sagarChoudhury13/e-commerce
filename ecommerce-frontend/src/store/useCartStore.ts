@@ -11,7 +11,8 @@ interface CartStore {
     quantity: number, 
     onError?: (code: string | undefined, message: string) => void
   ) => Promise<void>;
-  clearCartItem: (productId: number, onError?: (code: string | undefined, message: string) => void) => Promise<void>;
+  clearCartItem: (productId: number, onError?: (code: string | undefined, message: string) => void) => Promise<void>,
+  clearCart: () => void;
 }
 
 export const useCartStore = create<CartStore>((set) => ({
@@ -22,6 +23,11 @@ export const useCartStore = create<CartStore>((set) => ({
   fetchCart: async () => {
     try {
       const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+
+      if(token === null){
+        set({ isLoaded: true });
+        return;
+      }
       
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/cart`, {
         method: "GET",
@@ -163,4 +169,5 @@ export const useCartStore = create<CartStore>((set) => ({
       }
     }
   },
+  clearCart: () => set({ items: [] })
 }));

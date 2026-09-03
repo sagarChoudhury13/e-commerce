@@ -1,78 +1,116 @@
+"use client"
+
 import Image from "next/image";
-import { Minus, Plus, Trash2 } from "lucide-react";
+import { Plus, Minus, Trash2, ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import type { Product } from "@/types";
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@/components/ui/item";
+import { useCartStore } from "@/store/useCartStore";
+import { useErrorToast } from "@/hooks/error-toast";
+import type { Product } from "@/types/index"; // Adjust path if needed
 
 interface CartItemProps {
-  product: Product;
-  quantity: number;
-  onUpdate: (productId: number, newQuantity: number) => void;
+  item: { productId: number; quantity: number; products: Product }; 
 }
 
-export function CartItem({ product, quantity, onUpdate }: CartItemProps) {
+export function CartItemComponent({ item }: CartItemProps) {
+  const updateQuantity = useCartStore((state) => state.updateQuantity);
+  const clearCartItem = useCartStore((state) => state.clearCartItem);
+  const { showErrorToast } = useErrorToast();
+
+  const { productId, quantity, products: product } = item;
+
+  const handleDecrease = () => {
+    if (quantity <= 1) {
+      clearCartItem(productId, showErrorToast);
+    } else {
+      updateQuantity(productId, quantity - 1, showErrorToast);
+    }
+  };
+
+  const handleIncrease = () => {
+    updateQuantity(productId, quantity + 1, showErrorToast);
+  };
+
+  const handleRemove = () => {
+    clearCartItem(productId, showErrorToast);
+  };
+
   return (
-    <Card className="overflow-hidden">
-      <CardContent className="p-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-        {/* Product Image */}
-        <div className="relative w-24 h-24 bg-muted shrink-0 rounded-md overflow-hidden">
-          {product.image_url && (
-            <Image
-              src={product.image_url}
-              alt={product.name}
-              fill
-              className="object-cover"
-            />
-          )}
-        </div>
+    <Item variant="outline" className="w-full p-4 gap-4">
+      {/* 1. Image Media */}
+      <ItemMedia className="relative h-20 w-20 shrink-0 overflow-hidden rounded-md border bg-muted flex items-center justify-center">
+        {product.image_url ? (
+          <Image
+            src={product.image_url}
+            alt={product.name}
+            fill
+            className="object-cover"
+            sizes="80px"
+          />
+        ) : (
+          <ImageIcon className="h-8 w-8 text-muted-foreground/50" />
+        )}
+      </ItemMedia>
+
+      {/* 2. Product Info */}
+      <ItemContent className="flex-1">
+        <ItemTitle className="line-clamp-2 text-base font-medium">
+          {product.name}
+        </ItemTitle>
+        <ItemDescription className="font-bold text-foreground mt-1.5 text-lg">
+          ₹{Number(product.price).toLocaleString("en-IN")}
+        </ItemDescription>
+      </ItemContent>
+
+      {/* 3. Actions (Quantity + Remove) */}
+      <ItemActions className="flex flex-col items-end gap-3 justify-between sm:flex-row sm:items-center">
         
-        <div className="flex-1 flex flex-col sm:flex-row justify-between w-full gap-4">
-          <div className="space-y-1">
-            <h3 className="font-semibold text-base sm:text-lg leading-tight line-clamp-2">
-              {product.name}
-            </h3>
-            <p className="font-bold text-lg text-primary">
-              ₹{product.price.toLocaleString("en-IN")}
-            </p>
+        {/* Quantity Selector */}
+        <div className="flex items-center border border-input rounded-md overflow-hidden h-9 bg-background">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-full w-9 rounded-none hover:bg-muted"
+            onClick={handleDecrease}
+          >
+            <Minus className="h-3.5 w-3.5" />
+            <span className="sr-only">Decrease quantity</span>
+          </Button>
+
+          <div className="flex h-full w-10 items-center justify-center text-sm font-medium select-none">
+            {quantity}
           </div>
 
-          <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between gap-4">
-            {/* Quantity Controls */}
-            <div className="flex items-center border border-input rounded-md overflow-hidden bg-background h-9 w-fit">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-full w-9 rounded-none hover:bg-muted"
-                onClick={() => onUpdate(product.id, quantity - 1)}
-              >
-                <Minus className="h-3 w-3" />
-              </Button>
-              <span className="font-semibold text-sm w-8 text-center select-none flex items-center justify-center">
-                {Number.isNaN(quantity) ? 0 : quantity}
-              </span>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-full w-9 rounded-none hover:bg-muted"
-                onClick={() => onUpdate(product.id, quantity + 1)}
-              >
-                <Plus className="h-3 w-3" />
-              </Button>
-            </div>
-
-            {/* Remove Button */}
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="text-destructive hover:text-destructive hover:bg-destructive/10 h-8"
-              onClick={() => onUpdate(product.id, 0)}
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Remove
-            </Button>
-          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-full w-9 rounded-none hover:bg-muted"
+            onClick={handleIncrease}
+          >
+            <Plus className="h-3.5 w-3.5" />
+            <span className="sr-only">Increase quantity</span>
+          </Button>
         </div>
-      </CardContent>
-    </Card>
+
+        {/* Remove Button */}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-destructive hover:text-destructive hover:bg-destructive/10 h-9 px-3"
+          onClick={handleRemove}
+        >
+          <Trash2 className="h-4 w-4 sm:mr-2" />
+          <span className="hidden sm:inline">Remove</span>
+        </Button>
+        
+      </ItemActions>
+    </Item>
   );
 }

@@ -21,6 +21,19 @@ export interface Product {
   tags: string;
   createdAt: Date;
   updatedAt: Date;
-  cart : Object[];
-  orderProduct: Object []
+  cart: Object[];
+  orderProduct: Object[]
+}
+
+export interface Address {
+  id: number,
+  lineOne: string,
+  lineTwo: string | null,
+  city: string,
+  pincode: string,
+  country: string,
+  userId: number,
+  createdAt: Date,
+  updatedAt: Date,
+  formattedAddress: string
 }

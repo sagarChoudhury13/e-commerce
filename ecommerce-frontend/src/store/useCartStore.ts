@@ -15,7 +15,7 @@ interface CartStore {
   clearCart: () => void;
 }
 
-export const useCartStore = create<CartStore>((set) => ({
+export const useCartStore = create<CartStore>((set,get) => ({
   items: [],
   isLoaded: false,
 
@@ -26,6 +26,7 @@ export const useCartStore = create<CartStore>((set) => ({
 
       if(token === null){
         set({ isLoaded: true });
+        set({ items: [] });
         return;
       }
       
@@ -65,6 +66,11 @@ export const useCartStore = create<CartStore>((set) => ({
   }));
     try{
       const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      if(token === null){
+        onError?.(undefined, "User not authenticated");
+        set({ items: get().items.filter(item => item.productId !== product.id) });
+        return;
+      }
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/cart`, {
         method: "POST",
         headers: {

@@ -50,7 +50,7 @@ export const listAddress = async(req: AuthenticatedRequest, res: Response)=>{
 }
 
 
-export const updateUser = async(req:AuthenticatedRequest, res: Response)=>{
+export const updateDefaultAddress = async(req:AuthenticatedRequest, res: Response)=>{
 
         const validate = updateUserSchema.safeParse(req.body);
         if(!validate.success){
@@ -121,6 +121,7 @@ export const getUserById = async(req:AuthenticatedRequest, res:Response)=>{
                 }
             }
         )
+         res.json(user);
     }catch(err:any){
         throw new NotFoundException("User not found", ErrorCode.USER_NOT_FOUND)
     }

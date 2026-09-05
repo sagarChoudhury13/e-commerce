@@ -28,9 +28,12 @@ export const createOrder = async (req: AuthenticatedRequest, res: Response) => {
             return res.json({ message: "Cart is empty." })
         }
 
-        const totalAmount = cartItems.reduce((acc, curr) => {
+        const MRP = cartItems.reduce((acc, curr) => {
             return acc + (+curr.products.price * curr.quantity)
         }, 0)
+
+        const totalAmount = MRP > 500 ? MRP : MRP + 50
+        
         const address = await tx.address.findFirst({
             where: {
                 id: req.user.defaultShippingAddress

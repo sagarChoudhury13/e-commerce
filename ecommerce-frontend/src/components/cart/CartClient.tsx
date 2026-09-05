@@ -11,6 +11,8 @@ import { useCartStore } from "@/store/useCartStore";
 import { useAddressStore } from "@/store/useAddressStore"; 
 import { CartItemComponent } from "@/components/cart/CartItem"; 
 import {useAuthStore} from "@/store/useAuthStore";
+import { useErrorToast } from "@/hooks/error-toast";
+import { useRouter } from "next/navigation";
 
 export function CartClient() {
   const [mounted, setMounted] = useState(false);
@@ -20,6 +22,7 @@ export function CartClient() {
   const addresses = useAddressStore((state) => state.addresses);
   const selectedAddress = addresses.find(a=> a.id === user?.defaultShippingAddress)
   const setAddresses = useAddressStore((state) => state.setAddresses);
+  const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
@@ -36,6 +39,46 @@ export function CartClient() {
 
   const deliveryFee = subtotal > 500 || subtotal === 0 ? 0 : 50;
   const totalAmount = subtotal + deliveryFee;
+
+  const { showErrorToast } = useErrorToast();
+
+  const placeOrder = async() => {
+    try {
+      const token = localStorage.getItem("token");
+      if(token === null){
+        showErrorToast(undefined, "User not authenticated");
+        return;
+      }
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/order`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token && { "Authorization": `Bearer ${token}` })
+        },
+      })
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(JSON.stringify({ 
+          code: errorData.errorCode, 
+          message: errorData.message 
+        }));
+      }
+
+      const newOrder = await response.json();
+    
+    // Clear the global cart since they just bought everythingorder
+    useCartStore.getState().clearCart();
+      router.push(`/order/${newOrder.order.id}`);
+  }catch (err:any)
+    {
+      try {
+          const parsedError = JSON.parse(err.message);
+          showErrorToast(parsedError.code, parsedError.message);
+        } catch {
+          showErrorToast(undefined, "Network error. Is the server running?");
+        }
+    }
+}
 
   if (items.length === 0) {
     return (
@@ -110,13 +153,13 @@ export function CartClient() {
               <span>Total Amount</span>
               <span>₹{totalAmount.toLocaleString("en-IN")}</span>
             </div>
-            
             <Button 
               className="w-full mt-6" 
               size="lg"
               disabled={!selectedAddress}
+              onClick = {placeOrder}
             >
-              {selectedAddress ? "Place Order" : "Add an address"}
+            Place Order
             </Button>
           </CardContent>
         </Card>

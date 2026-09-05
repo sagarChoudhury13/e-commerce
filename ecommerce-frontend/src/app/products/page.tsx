@@ -4,6 +4,12 @@ import { ProductPagination }  from  '@/components/products/ProductPagination'
 import { CartInitializer } from "@/components/cart/CartInitializer";
 
 
+export const metadata = {
+  title: "All Products | SHOP XYZ",
+  description: "Browse our wide range of products and find what you love.",
+};
+
+
 const ITEMS_PER_PAGE = 6;
 
 interface FetchResponse {

@@ -27,6 +27,9 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useErrorToast } from '@/hooks/error-toast';
 import { useAuthStore } from '@/store/useAuthStore';
+import { setAuthCookie } from "@/actions/auth";
+
+
 
 export function LoginForm() {
 
@@ -65,7 +68,8 @@ export function LoginForm() {
     }
 
     const {token, user, message} = await loginResponse.json();
-    localStorage.setItem("token", token)
+    localStorage.setItem("token", token);
+    await setAuthCookie(token);
     setUser(user);
     console.log(message);
     toast.add({

@@ -17,8 +17,8 @@ export const addressSchema = z.object({
 
 export const updateUserSchema = z.object({
     name: z.string().optional(),
-    defaultShippingAddress: z.number().optional(),
-    defaultBillingAddress: z.number().optional()
+    defaultShippingAddress: z.coerce.number().optional(),
+    defaultBillingAddress: z.coerce.number().optional()
 })
 
 export const changeRoleSchema = z.object({

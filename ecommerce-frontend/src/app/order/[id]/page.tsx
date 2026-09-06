@@ -1,19 +1,21 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
-import {
-  CheckCircle2,
-  MapPin,
-  Calendar,
-  ArrowLeft,
+import { 
+  MapPin, 
+  Calendar, 
+  ArrowLeft, 
   Receipt,
+  ClipboardList,
+  Cog,
+  Truck,
+  PackageCheck,
+  Check
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { toast } from "@/components/ui/toast";
 
-// 1. Updated Interface matching your exact GET response
 interface OrderResponse {
   id: number;
   userId: number;
@@ -22,189 +24,231 @@ interface OrderResponse {
   status: string;
   createdAt: string;
   updatedAt: string;
-  orderProduct: any[];
+  orderProduct: any[]; 
   orderEvent: {
     id: number;
     orderId: number;
     status: string;
     createdAt: string;
     updatedAt: string;
-  }[];
+  }[]; 
 }
 
-// 2. Server-side fetch helper
+// Map each status to a specific icon for a premium look
+const ORDER_STEPS = [
+  { status: "PENDING", label: "Order Placed", icon: ClipboardList },
+  { status: "PROCESSING", label: "Processing", icon: Cog },
+  { status: "SHIPPED", label: "Shipped", icon: Truck },
+  { status: "DELIVERED", label: "Delivered", icon: PackageCheck }
+];
+
 async function getOrder(id: string): Promise<OrderResponse | null> {
   try {
-    // Next.js 15 requires awaiting cookies()
     const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
+    
+    if (!token) return null;
 
-    // If there is no token in the cookies, the server cannot fetch the order
-    if (!token) {
-      toast.add({
-        title: "Authentication Error",
-        description: "User not authenticated. Please log in.",
-        type: "error",
-      });
-      return null;
-    }
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/order/${id}`,
-      {
-        method: "GET",
-        headers: {
-          ...(token && { Authorization: `Bearer ${token}` }),
-        },
-        cache: "no-store", // Always fetch the freshest order status
-      },
-    );
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/order/${id}`, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
+      cache: 'no-store',
+    });
 
-    if (!response.ok) {
-      console.log(await response.json());
-      return null;
-    }
-
-    return response.json();
+    if (!response.ok) return null;
+    return response.json(); 
   } catch (error) {
-    console.error("Failed to fetch order", error);
     return null;
   }
 }
 
-export default async function OrderConfirmationPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
+export default async function OrderConfirmationPage({ 
+  params 
+}: { 
+  params: Promise<{ id: string }> 
 }) {
-  // 3. Unwrap the dynamic route params
   const { id } = await params;
-
-  // 4. Fetch the data securely on the server
   const order = await getOrder(id);
 
-  // 5. Error / Not Found State
   if (!order || !order.id) {
     return (
-      <div className="container mx-auto px-4 py-24 text-center flex flex-col items-center">
-        <Receipt className="h-16 w-16 text-muted-foreground mb-4" />
-        <h1 className="text-2xl font-bold mb-2">Order Not Found</h1>
-        <p className="text-muted-foreground mb-8">
-          We couldn't find the details for this order, or you are not authorized
-          to view it.
-          <br />
-          <span className="text-sm text-destructive mt-2 inline-block">
-            (Note: If you are using localStorage for auth, this Server Component
-            cannot read it.)
-          </span>
+      <div className="min-h-[60vh] flex flex-col items-center justify-center px-4">
+        <div className="h-24 w-24 bg-muted rounded-full flex items-center justify-center mb-6">
+          <Receipt className="h-10 w-10 text-muted-foreground" />
+        </div>
+        <h1 className="text-2xl font-bold mb-2 tracking-tight">Order Not Found</h1>
+        <p className="text-muted-foreground mb-8 text-center max-w-sm">
+          We couldn't find the details for this order, or you are not authorized to view it.
         </p>
-        <Button>
+        <Button size="lg" className="rounded-full">
           <Link href="/products">Return to Shop</Link>
         </Button>
       </div>
     );
   }
 
-  // Fallback just in case orderEvent is missing or not an array
   const eventsArray = Array.isArray(order.orderEvent) ? order.orderEvent : [];
+  
+  // Calculate the highest completed step index for the continuous line fill
+  const currentStepIndex = ORDER_STEPS.reduce((latest, step, index) => {
+    return eventsArray.find(e => e.status === step.status) ? index : latest;
+  }, 0);
 
-  // 6. Success UI
   return (
-    <main className="container mx-auto px-4 py-12 max-w-4xl">
-      {/* Success Header */}
-      <div className="flex flex-col items-center text-center mb-10 space-y-4">
-        <CheckCircle2 className="h-16 w-16 text-green-500" />
-        <h1 className="text-3xl font-bold tracking-tight">
-          Order Placed Successfully!
-        </h1>
-        <p className="text-muted-foreground">
-          Thank you for your purchase. Your order ID is{" "}
-          <span className="font-semibold text-foreground">#{order.id}</span>
-        </p>
-        <Button variant="outline" className="mt-2">
-          <Link href="/products">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Continue Shopping
-          </Link>
-        </Button>
+    <main className="min-h-screen bg-muted/30 pb-20">
+      {/* Top Banner Background */}
+      <div className="bg-background border-b pt-16 pb-12">
+        <div className="container mx-auto px-4 max-w-4xl flex flex-col items-center text-center">
+          
+          {/* Animated Success Checkmark using Tailwind peer/group classes */}
+          <div className="relative flex items-center justify-center w-24 h-24 mb-6">
+            {/* Outer expanding ring */}
+            <div className="absolute inset-0 rounded-full bg-green-100 animate-[ping_2s_cubic-bezier(0,0,0.2,1)_infinite]" />
+            {/* Inner solid circle with pop-in animation */}
+            <div className="relative flex items-center justify-center w-16 h-16 bg-green-500 rounded-full shadow-lg shadow-green-500/30 animate-in zoom-in duration-500 ease-out">
+              {/* Check icon with a slight delay so it draws smoothly */}
+              <Check className="w-8 h-8 text-white stroke-3 animate-in slide-in-from-bottom-2 fade-in duration-500 delay-200 fill-mode-backwards" />
+            </div>
+          </div>
+          
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-3">
+            Order Confirmed!
+          </h1>
+          <p className="text-muted-foreground text-lg mb-8">
+            Thank you for shopping with us. Your order ID is <span className="font-semibold text-foreground">#{order.id}</span>
+          </p>
+          <Button variant="outline" className="rounded-full shadow-sm color-primary hover:border-primary transition-colors">
+            <Link href="/products" className="flex items-center gap-2">
+              <ArrowLeft className="mr-2 h-4 w-4" /> Continue Shopping
+            </Link>
+          </Button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Left Column: Timeline */}
-        <div className="md:col-span-2 space-y-6">
-          <Card>
-            <CardHeader className="border-b pb-4">
-              <CardTitle className="text-lg">Order Status</CardTitle>
-            </CardHeader>
-            <CardContent className="p-6">
-              <div className="space-y-4">
-                {eventsArray.map((event, index) => (
-                  <div key={event.id} className="flex gap-4">
-                    <div className="flex flex-col items-center">
-                      <div className="h-3 w-3 rounded-full bg-primary mt-1.5" />
-                      {index !== eventsArray.length - 1 && (
-                        <div className="w-px h-full bg-border my-1" />
-                      )}
-                    </div>
-                    <div className="pb-4">
-                      <p className="font-medium">{event.status}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(event.createdAt).toLocaleString("en-IN", {
-                          dateStyle: "medium",
-                          timeStyle: "short",
-                        })}
-                      </p>
-                    </div>
+      {/* Main Content Grid */}
+      <div className="container mx-auto px-4 py-10 max-w-5xl">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          
+          {/* Left Column: Smooth Timeline */}
+          <div className="lg:col-span-7 space-y-6">
+            <Card className="border-none shadow-md">
+              <CardHeader className="pb-6 border-b bg-muted/10">
+                <CardTitle className="text-xl">Track Order</CardTitle>
+              </CardHeader>
+              <CardContent className="p-8">
+                
+                <div className="relative">
+                  {/* The Background Line */}
+                  <div className="absolute top-5 bottom-5 left-[1.35rem] w-0.5 bg-muted/50 rounded-full" />
+                  
+                  {/* The Animated Fill Line */}
+                  <div 
+                    className="absolute top-5 left-[1.35rem] w-0.5 bg-primary rounded-full transition-all duration-1000 ease-in-out"
+                    style={{ height: `${(currentStepIndex / (ORDER_STEPS.length - 1)) * 100}%` }}
+                  />
+
+                  <div className="flex flex-col gap-10">
+                    {ORDER_STEPS.map((step, index) => {
+                      const matchingEvent = eventsArray.find((e) => e.status === step.status);
+                      const isCompleted = !!matchingEvent;
+                      const isCurrent = currentStepIndex === index;
+                      const Icon = step.icon;
+
+                      return (
+                        <div key={step.status} className="relative flex items-start gap-6 group">
+                          
+                          {/* Animated Icon Container */}
+                          <div 
+                            className={`relative z-10 flex items-center justify-center w-11 h-11 rounded-full border-2 transition-all duration-500 ease-out bg-background
+                              ${isCompleted ? 'border-primary text-primary shadow-sm' : 'border-muted text-muted-foreground'}
+                              ${isCurrent ? 'ring-4 ring-primary/10 scale-110' : 'scale-100'}
+                            `}
+                          >
+                            <Icon className={`w-5 h-5 transition-transform duration-500 ${isCurrent ? 'animate-[spin_3s_linear_infinite]' : ''} ${step.status === 'PROCESSING' && isCurrent ? 'animate-[spin_3s_linear_infinite]' : ''}`} />
+                          </div>
+                          
+                          {/* Step Content */}
+                          <div className="flex flex-col pt-2.5">
+                            <h4 className={`text-base font-semibold transition-colors duration-300 ${
+                              isCompleted ? 'text-foreground' : 'text-muted-foreground/60'
+                            }`}>
+                              {step.label}
+                            </h4>
+                            
+                            <div className="mt-1 h-5 overflow-hidden">
+                              <div className={`transition-all duration-500 transform ${
+                                isCompleted ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
+                              }`}>
+                                {matchingEvent?.createdAt && (
+                                  <p className="text-sm text-muted-foreground">
+                                    {new Date(matchingEvent.createdAt).toLocaleString("en-IN", {
+                                      weekday: 'short',
+                                      month: 'short', 
+                                      day: 'numeric',
+                                      hour: 'numeric',
+                                      minute: '2-digit'
+                                    })}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+                </div>
+                
+              </CardContent>
+            </Card>
+          </div>
 
-        {/* Right Column: Summary & Details */}
-        <div className="space-y-6">
-          <Card>
-            <CardHeader className="pb-4 border-b">
-              <CardTitle className="text-lg">Order Summary</CardTitle>
-            </CardHeader>
-            <CardContent className="p-6 space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Status</span>
-                <Badge
-                  variant={
-                    order.status === "Delivered" ? "default" : "secondary"
-                  }
-                >
-                  {order.status}
-                </Badge>
-              </div>
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-muted-foreground flex items-center gap-1.5">
-                  <Calendar className="h-4 w-4" /> Date
-                </span>
-                <span>
-                  {new Date(order.createdAt).toLocaleDateString("en-IN")}
-                </span>
-              </div>
+          {/* Right Column: Order Details */}
+          <div className="lg:col-span-5 space-y-6">
+            <Card className="border-none shadow-md">
+              <CardHeader className="pb-4 border-b bg-muted/10">
+                <CardTitle className="text-lg">Order Summary</CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 space-y-5">
+                <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground">Current Status</span>
+                  <Badge 
+                    variant={order.status === "DELIVERED" ? "default" : "secondary"}
+                    className={order.status === "DELIVERED" ? "bg-green-500 hover:bg-green-600" : ""}
+                  >
+                    {order.status}
+                  </Badge>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground flex items-center gap-2">
+                    <Calendar className="h-4 w-4" /> Ordered On
+                  </span>
+                  <span className="font-medium text-sm">{new Date(order.createdAt).toLocaleDateString("en-IN", {
+                    month: 'long', day: 'numeric', year: 'numeric'
+                  })}</span>
+                </div>
+                
+                <Separator className="my-2" />
+                
+                <div className="flex justify-between items-center font-bold text-xl text-foreground">
+                  <span>Total Amount</span>
+                  <span>₹{Number(order.netAmount).toLocaleString("en-IN")}</span>
+                </div>
+              </CardContent>
+            </Card>
 
-              <Separator />
-
-              <div className="flex justify-between items-center font-bold text-lg">
-                <span>Total Paid</span>
-                <span>₹{Number(order.netAmount).toLocaleString("en-IN")}</span>
+            <Card className="border-none shadow-md overflow-hidden">
+              <div className="bg-primary/5 px-6 py-4 border-b flex items-center gap-2">
+                <MapPin className="h-5 w-5 text-primary" /> 
+                <h3 className="font-semibold text-foreground">Delivery Address</h3>
               </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-4 border-b">
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <MapPin className="h-5 w-5 text-primary" /> Delivery Address
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6 text-sm text-muted-foreground leading-relaxed">
-              <p>{order.address}</p>
-            </CardContent>
-          </Card>
+              <CardContent className="p-6">
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {order.address}
+                </p>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </main>

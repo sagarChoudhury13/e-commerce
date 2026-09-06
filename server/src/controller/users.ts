@@ -54,6 +54,7 @@ export const updateDefaultAddress = async(req:AuthenticatedRequest, res: Respons
 
         const validate = updateUserSchema.safeParse(req.body);
         if(!validate.success){
+            console.log("ZOD ERRORS:", JSON.stringify(validate.error.issues, null, 2));
             throw new UnprocessableEntity("no address found", ErrorCode.UNPROCESSABLE_ENTITY, validate.error.issues);
         }
         let shippingAddress : address;
@@ -65,6 +66,7 @@ export const updateDefaultAddress = async(req:AuthenticatedRequest, res: Respons
                 id: validate.data?.defaultShippingAddress!
             }
         })
+
         }catch(err:any){
             throw new NotFoundException("Address not found", ErrorCode.ADDRESS_NOT_FOUND);
         }

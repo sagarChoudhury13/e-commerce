@@ -6,19 +6,22 @@ import adminMiddleware from "../middleware/admin.ts";
 
 const userRoutes: Router = Router();
 
-userRoutes.post('/', [authMiddleware], errorHandler(createAddress));
+// --- ADDRESS MANAGEMENT ---
+// Note: If this router is mounted at app.use('/api/user', userRoutes), 
+// these become /api/user/address
 
-userRoutes.delete('/:id', [authMiddleware], errorHandler(deleteAddress));
+userRoutes.post('/address', [authMiddleware], errorHandler(createAddress));
+userRoutes.get('/address', [authMiddleware], errorHandler(listAddress));
+userRoutes.delete('/address/:id', [authMiddleware], errorHandler(deleteAddress));
 
-userRoutes.get('/', [authMiddleware], errorHandler(listAddress));
+// --- USER MANAGEMENT ---
+// Updates default shipping/billing
+userRoutes.put('/', [authMiddleware], errorHandler(updateDefaultAddress)); 
 
-userRoutes.put('/', [authMiddleware], errorHandler(updateDefaultAddress));
-
-userRoutes.get('/', [authMiddleware, adminMiddleware], errorHandler(listUsers))
-
-userRoutes.get('/:id', [authMiddleware, adminMiddleware], errorHandler(getUserById))
-
-userRoutes.put('/', [authMiddleware, adminMiddleware], errorHandler(changeUserRole))
-
+// --- ADMIN ROUTES ---
+// Use distinct paths so they don't collide with the routes above
+userRoutes.get('/all', [authMiddleware, adminMiddleware], errorHandler(listUsers));
+userRoutes.get('/:id', [authMiddleware, adminMiddleware], errorHandler(getUserById));
+userRoutes.put('/:id/role', [authMiddleware, adminMiddleware], errorHandler(changeUserRole));
 
 export default userRoutes;

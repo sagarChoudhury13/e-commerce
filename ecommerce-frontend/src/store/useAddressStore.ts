@@ -1,11 +1,19 @@
 import type { Address } from "@/types/index";
 import { create } from 'zustand';
 
+export interface NewAddress {
+    lineOne: string;
+    lineTwo: string | null;
+    city: string;
+    pincode: string;
+    country: string;
+}
+
 interface AddressStore {
     addresses: Address[];
     setAddresses: () => Promise<void>;
-    addAddress: (address: Address, onError?: (code: string | undefined, message: string) => void) => Promise<void>;
-    removeAddress: (id: number, onError?: (code: string | undefined, message: string)=> void) => Promise<void>;
+    addAddress: (address: NewAddress, onError?: (code: string | undefined, message: string) => void) => Promise<void>;
+    removeAddress: (id: number, onError?: (code: string | undefined, message: string) => void) => Promise<void>;
 }
 
 export const useAddressStore = create<AddressStore>((set, get) => ({
@@ -20,11 +28,12 @@ export const useAddressStore = create<AddressStore>((set, get) => ({
                 set({ addresses: [] });
                 return;
             }
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/address`, {
                 method: "GET",
                 headers: {
-                    ...(token && { "Authorization": `Bearer ${token}` }),
-                }
+        "Content-Type": "application/json", // <-- THIS IS CRITICAL
+        "Authorization": `Bearer ${token}`
+      },
             })
 
             if (!response.ok) {
@@ -42,19 +51,26 @@ export const useAddressStore = create<AddressStore>((set, get) => ({
     },
 
     // 3. Append a new address to the existing array
-    addAddress: async (address: Address, onError) => {
+    addAddress: async (address: NewAddress, onError) => {
         try {
             const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
             if (token === null) {
                 onError?.(undefined, "User not authenticated");
                 return;
             }
-
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/address`, {
                 method: "POST",
-                headers: {
-                    ...(token && { "Authorization": `Bearer ${token}` }),
-                }
+               headers: {
+        "Content-Type": "application/json", // <-- ADD THIS LINE
+        ...(token && { "Authorization": `Bearer ${token}` }),
+    },
+                body: JSON.stringify({
+                    lineOne: address.lineOne,
+                    lineTwo: address.lineTwo,
+                    city: address.city,
+                    pincode: address.pincode,
+                    country: address.country
+                })
             });
             if (!response.ok) {
                 const errorData = await response.json();
@@ -64,6 +80,7 @@ export const useAddressStore = create<AddressStore>((set, get) => ({
             set((state) => ({
                 addresses: [...state.addresses, newAddress]
             }));
+            
         } catch (err: any) {
             if (onError) {
                 try {
@@ -84,11 +101,12 @@ export const useAddressStore = create<AddressStore>((set, get) => ({
                 onError?.(undefined, "User not authenticated");
                 return;
             }
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${id}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/address/${id}`, {
                 method: "DELETE",
                 headers: {
-                    ...(token && { "Authorization": `Bearer ${token}` }),
-                }
+        "Content-Type": "application/json", // <-- ADD THIS LINE
+        ...(token && { "Authorization": `Bearer ${token}` }),
+    },
             });
 
             if (!response.ok) {

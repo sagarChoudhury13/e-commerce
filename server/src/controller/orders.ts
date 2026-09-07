@@ -81,7 +81,11 @@ export const listOrders = async(req: AuthenticatedRequest, res: Response) =>{
     const orders = await prismaClient.order.findMany({
         where: {
             userId: req.user.id
-        }
+        },
+        include: {
+                orderProduct: true,
+                orderEvent: true
+            }
     })
     res.json(orders?orders:"NO orders")
 }

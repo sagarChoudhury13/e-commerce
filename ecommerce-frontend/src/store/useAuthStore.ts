@@ -1,10 +1,12 @@
 import { User } from '@/types';
 import { create } from 'zustand';
+import { removeAuthCookie } from '@/actions/auth';
+
 
 interface AuthState {
   user: User | null;
   setUser: (user: User | null) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
   changeDefaultAddress: (addressId: number, onError: (code: string | undefined, message: string) => void
   ) => Promise<void>;
 }
@@ -12,8 +14,10 @@ interface AuthState {
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   setUser: (user) => set({ user }),
-  logout: () => {
+  logout: async() => {
     localStorage.removeItem("token");
+    await removeAuthCookie();
+    
     set({ user: null });
   },
   changeDefaultAddress: async (addressId: number, onError) => {

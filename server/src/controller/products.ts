@@ -157,7 +157,7 @@ export const listProducts = async(req:Request, res:Response)=>{
     let orderByClause: any = { createdAt: "desc" }; 
     
     if (sort === "oldest") orderByClause = { createdAt: "asc" };
-    if (sort === "price_asc") orderByClause = { price: "asc" };
+    if (sort === "price_asc") orderByClause = { price: "asc" };                                     
     if (sort === "price_desc") orderByClause = { price: "desc" };
 
         const count = await prismaClient.products.count();

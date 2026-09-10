@@ -18,20 +18,8 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useAuthStore } from "@/store/useAuthStore";
 import Link from "next/link";
-
-// --- DUMMY DATA ---
-const CATEGORIES = [
-  { id: 1, name: "New Arrivals", title: "Latest Drops", img: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=800&auto=format&fit=crop", span: "md:col-span-2 md:row-span-2" },
-  { id: 2, name: "Accessories", title: "Elevate Your Look", img: "https://images.unsplash.com/photo-1492707892479-7bc8d5a4ee93?q=80&w=800&auto=format&fit=crop", span: "md:col-span-1 md:row-span-1" },
-  { id: 3, name: "Footwear", title: "Step in Style", img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=800&auto=format&fit=crop", span: "md:col-span-1 md:row-span-1" },
-];
-
-const FEATURED_PRODUCTS = [
-  { id: 1, name: "Oversized Heavyweight Hoodie", price: "2,499", rating: 4.9, img: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=600&auto=format&fit=crop", tag: "Bestseller" },
-  { id: 2, name: "Minimalist Chronograph", price: "4,299", rating: 4.8, img: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=600&auto=format&fit=crop", tag: "Trending" },
-  { id: 3, name: "Urban Tech Cargo Pants", price: "3,199", rating: 4.7, img: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?q=80&w=600&auto=format&fit=crop" },
-  { id: 4, name: "Premium Leather Sneakers", price: "5,999", rating: 4.9, img: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?q=80&w=600&auto=format&fit=crop", tag: "Limited" },
-];
+import type { Product } from "@/types";
+import { ProductDialog } from "../products/ProductDialog";
 
 const FEATURES = [
   { icon: Truck, title: "Free Express Shipping", desc: "On all orders over ₹300" },
@@ -42,11 +30,30 @@ const FEATURES = [
 
 export function HomePage() {
   const [mounted, setMounted] = useState(false);
-  const {user} = useAuthStore()
+  const {user} = useAuthStore();
+  const [trendingProducts, setTrendingProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   useEffect(() => {
     setMounted(true);
 
+    async function fetchHomepageData() {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products?take=4&sort=latest`);
+        
+        if (res.ok) {
+          const data = await res.json();
+          setTrendingProducts(data.data);
+        }
+      } catch (error) {
+        console.log("Failed to fetch trending products:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchHomepageData();
   }, []);
 
   if (!mounted) return null;
@@ -56,7 +63,6 @@ export function HomePage() {
       
       {/* 1. HERO SECTION */}
       <section className="relative w-full h-[90vh] min-h-150 flex items-center justify-center overflow-hidden bg-muted/20">
-        {/* Background Decorative Blobs */}
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10">
           <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary/20 blur-[120px] animate-pulse" />
           <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-blue-500/20 blur-[120px] animate-pulse" style={{ animationDelay: "2s" }} />
@@ -64,7 +70,6 @@ export function HomePage() {
 
         <div className="container px-4 md:px-6 z-10">
           <div className="flex flex-col items-center text-center space-y-8">
-            
             <h1 
               className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter max-w-5xl animate-in fade-in slide-in-from-bottom-8 duration-700 delay-150"
               style={{ animationFillMode: 'both' }}
@@ -85,27 +90,30 @@ export function HomePage() {
             <div 
               className="flex flex-col sm:flex-row gap-4 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-500"
               style={{ animationFillMode: 'both' }}
-            >{user? <>
-            <Link href = "\products">
-              <Button size="lg" className="h-14 px-8 text-base group transition-all hover:scale-105">
-                <ShoppingBag className="mr-2 h-5 w-5 group-hover:animate-bounce" />
-                Start Shopping
-                <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
-              </Button>
-              </Link>
-              </> : <>
-              <Link href = "\signup"> 
-              <Button size="lg" className="h-14 px-8 text-base group transition-all hover:scale-105">
-                Create a SHOP XYZ account  
-              </Button>
-               </Link>
-               <Link href = "\login">
-              <Button size="lg" variant="outline" className="h-14 px-8 text-base group transition-all hover:scale-105 bg-background/50 backdrop-blur-md">
-                Log in
-                <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
-              </Button>
-              </Link>
-              </>  }
+            >
+              {user ? (
+                <Link href="\products">
+                  <Button size="lg" className="h-14 px-8 text-base group transition-all hover:scale-105">
+                    <ShoppingBag className="mr-2 h-5 w-5 group-hover:animate-bounce" />
+                    Start Shopping
+                    <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                  </Button>
+                </Link>
+              ) : (
+                <>
+                  <Link href="\signup"> 
+                    <Button size="lg" className="h-14 px-8 text-base group transition-all hover:scale-105">
+                      Create a SHOP XYZ account  
+                    </Button>
+                  </Link>
+                  <Link href="\login">
+                    <Button size="lg" variant="outline" className="h-14 px-8 text-base group transition-all hover:scale-105 bg-background/50 backdrop-blur-md">
+                      Log in
+                      <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -118,10 +126,7 @@ export function HomePage() {
             {FEATURES.map((feat, i) => {
               const Icon = feat.icon;
               return (
-                <div 
-                  key={i} 
-                  className="flex flex-col items-center text-center space-y-2 group p-4"
-                >
+                <div key={i} className="flex flex-col items-center text-center space-y-2 group p-4">
                   <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
                     <Icon className="h-6 w-6" />
                   </div>
@@ -133,48 +138,7 @@ export function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* 3. BENTO GRID CATEGORIES */}
-      <section className="container mx-auto px-4 py-24">
-        <div className="flex items-center justify-between mb-10">
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Shop by Category</h2>
-          <Button variant="ghost" className="hidden sm:flex group">
-            View All Categories <ChevronRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
-          </Button>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 md:grid-rows-2 gap-4 h-[800px] md:h-[600px]">
-          {CATEGORIES.map((cat, i) => (
-            <div 
-              key={cat.id} 
-              className={`relative overflow-hidden rounded-2xl group cursor-pointer ${cat.span}`}
-            >
-              {/* Image Background */}
-              <div 
-                className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-                style={{ backgroundImage: `url(${cat.img})` }}
-              />
-              {/* Gradient Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-500" />
-              
-              {/* Content */}
-              <div className="absolute inset-0 p-8 flex flex-col justify-end items-start text-white">
-                <Badge variant="secondary" className="mb-3 bg-white/20 hover:bg-white/30 text-white border-none backdrop-blur-md">
-                  {cat.name}
-                </Badge>
-                <h3 className="text-2xl md:text-3xl font-bold mb-2 transform transition-transform duration-500 group-hover:-translate-y-2">
-                  {cat.title}
-                </h3>
-                <div className="flex items-center gap-2 opacity-0 transform translate-y-4 transition-all duration-500 group-hover:opacity-100 group-hover:translate-y-0">
-                  <span className="text-sm font-medium">Explore Now</span>
-                  <ArrowRight className="h-4 w-4" />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
+    
       {/* 4. TRENDING PRODUCTS CAROUSEL/GRID */}
       <section className="bg-muted/30 py-24 border-t">
         <div className="container mx-auto px-4">
@@ -183,50 +147,65 @@ export function HomePage() {
               <TrendingUp className="h-4 w-4 mr-2 text-primary" /> Just Dropped
             </Badge>
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Trending Right Now</h2>
-            <p className="text-muted-foreground max-w-2xl">Handpicked styles that are currently dominating the charts.</p>
+            <p className="text-muted-foreground max-w-2xl">Handpicked styles pulled directly from our latest stock.</p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {FEATURED_PRODUCTS.map((product) => (
-              <Card key={product.id} className="group overflow-hidden border-none shadow-sm hover:shadow-xl transition-all duration-500 bg-background">
-                <div className="relative aspect-[4/5] overflow-hidden bg-muted">
-                  {product.tag && (
-                    <Badge className="absolute top-4 left-4 z-10 shadow-md">
-                      {product.tag}
-                    </Badge>
-                  )}
-                  {/* Product Image */}
-                  <div 
-                    className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
-                    style={{ backgroundImage: `url(${product.img})` }}
-                  />
-                  
-                  {/* Hover Add to Cart Action */}
-                  <div className="absolute inset-x-0 bottom-0 p-4 opacity-0 translate-y-8 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0 bg-gradient-to-t from-black/60 to-transparent">
-                    <Button className="w-full shadow-lg" size="sm">
-                      <ShoppingBag className="mr-2 h-4 w-4" /> Add to Cart
-                    </Button>
-                  </div>
+            {isLoading ? (
+              Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="flex flex-col space-y-3">
+                  <div className="h-87.5 bg-muted/60 rounded-xl animate-pulse" />
+                  <div className="h-4 bg-muted/60 rounded w-[80%] animate-pulse" />
+                  <div className="h-4 bg-muted/60 rounded w-[40%] animate-pulse" />
                 </div>
-                
-                <CardContent className="p-5">
-                  <div className="flex justify-between items-start gap-2 mb-2">
-                    <h3 className="font-semibold text-base line-clamp-1 group-hover:text-primary transition-colors">
-                      {product.name}
-                    </h3>
-                    <div className="flex items-center gap-1 bg-muted px-2 py-0.5 rounded text-xs font-medium shrink-0">
-                      <Star className="h-3 w-3 fill-primary text-primary" /> {product.rating}
+              ))
+            ) : trendingProducts.length === 0 ? (
+              <div className="col-span-full py-12 text-center text-muted-foreground">
+                No products available right now. Check back soon!
+              </div>
+            ) : (
+              trendingProducts.map((product) => (
+                <Card key={product.id} onClick={() => setSelectedProduct(product)} className="group overflow-hidden border-none shadow-sm hover:shadow-xl transition-all duration-500 bg-background cursor-pointer">
+                  <div className="relative aspect-4/5 overflow-hidden bg-muted flex items-center justify-center">
+                    
+                    {product.tags && product.tags.length > 0 && (
+                      <Badge className="absolute top-4 left-4 z-10 shadow-md bg-background text-foreground hover:bg-background">
+                        {product.tags.split(",")[0]}
+                      </Badge>
+                    )}
+
+                    {product.image_url ? (
+                      <div 
+                        className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
+                        style={{ backgroundImage: `url(${product.image_url})` }}
+                      />
+                    ) : (
+                      <ShoppingBag className="h-16 w-16 text-muted-foreground/30" />
+                    )}
+                    
+                    <div className="absolute inset-x-0 bottom-0 p-4 opacity-0 translate-y-8 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0 bg-gradient-to-t from-black/60 to-transparent">
+                      <Button className="w-full shadow-lg" size="sm">
+                        <ShoppingBag className="mr-2 h-4 w-4" /> View Product
+                      </Button>
                     </div>
                   </div>
-                  <p className="font-bold text-lg">₹{product.price}</p>
-                </CardContent>
-              </Card>
-            ))}
+                  
+                  <CardContent className="p-5">
+                    <div className="flex justify-between items-start gap-2 mb-2">
+                      <h3 className="font-semibold text-base line-clamp-1 group-hover:text-primary transition-colors">
+                        {product.name}
+                      </h3>
+                    </div>
+                    <p className="font-bold text-lg">₹{Number(product.price).toLocaleString("en-IN")}</p>
+                  </CardContent>
+                </Card>
+              ))
+            )}
           </div>
           
           <div className="mt-12 text-center">
             <Button size="lg" variant="outline" className="rounded-full px-8 hover:bg-primary hover:text-primary-foreground transition-colors">
-              View All Products
+              <a href="/products">View All Products</a>
             </Button>
           </div>
         </div>
@@ -235,7 +214,7 @@ export function HomePage() {
       {/* 5. NEWSLETTER CTA */}
       <section className="relative overflow-hidden py-24 bg-zinc-950 text-zinc-50">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-[50%] -right-[10%] w-[70%] h-[150%] bg-gradient-to-b from-primary/20 to-transparent rotate-12 blur-[100px]" />
+          <div className="absolute top-[-50%] right-[-10%] w-[70%] h-[150%] bg-linear-to-b from-primary/20 to-transparent rotate-12 blur-[100px]" />
         </div>
         
         <div className="container mx-auto px-4 relative z-10">
@@ -262,8 +241,19 @@ export function HomePage() {
         </div>
       </section>
 
+      {/* RENDER DIALOG CONDITIONALLY */}
+      {selectedProduct && (
+        <ProductDialog 
+          product={selectedProduct} 
+          isOpen={!!selectedProduct} 
+          onOpenChange={(open) => {
+            if (!open) setSelectedProduct(null);
+          }} 
+        />
+      )}
+      
     </div>
   );
 }
 
-export default HomePage
+export default HomePage;

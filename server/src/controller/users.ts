@@ -9,23 +9,49 @@ import type { address } from "../../generated/prisma/browser.ts";
 import { BadRequestException } from "../exception/bad-request.ts";
 
 
-export const createAddress = async(req:AuthenticatedRequest, res:Response)=>{
-
+export const createAddress = async (req: AuthenticatedRequest, res: Response) => {
     const validate = addressSchema.safeParse(req.body);
-    if(!validate.success){throw new UnprocessableEntity("Invalid Address Request", ErrorCode.UNPROCESSABLE_ENTITY, validate.error.issues)};
-    try{
-        const address = await prismaClient.address.create({
-            data: {
-                ...req.body,
-                userId : req.user.id
+    if (!validate.success) {
+        throw new UnprocessableEntity("Invalid Address Request", ErrorCode.UNPROCESSABLE_ENTITY, validate.error.issues)
+    }
+
+    try {
+        const address = await prismaClient.$transaction(async (tx) => {
+            
+            // 1. Check how many addresses the user already has
+            const addressCount = await tx.address.count({
+                where: {
+                    userId: req.user.id
+                }
+            });
+
+            // 2. Create the new address
+            const newAddress = await tx.address.create({
+                data: {
+                    ...validate.data,
+                    userId: req.user.id
+                }
+            });
+
+            // 3. If this is their first address, set it as the default
+            if (addressCount === 0) {
+                
+                // Assuming your User model has a defaultShippingAddress ID field:
+                await tx.users.update({
+                    where: { id: req.user.id },
+                    data: { defaultShippingAddress: newAddress.id } 
+                });
             }
-        })
+
+            return newAddress;
+        });
+
         res.json(address);
 
-    }catch{
-        throw new NotFoundException("User not found", ErrorCode.USER_NOT_FOUND);
+    } catch (err: any) {
+        throw new NotFoundException("Failed to create address", ErrorCode.INTERNAL_EXCEPTION);
     }
-} 
+}
 
 export const deleteAddress = async (req: AuthenticatedRequest, res:Response)=>{
 

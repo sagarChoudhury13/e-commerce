@@ -26,14 +26,21 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useRouter } from "next/navigation";
 
 
 
 
 export function UserDropdown() {
-  
+
+  const router = useRouter();
   const user = useAuthStore((state) => state.user);
-  const  logout = useAuthStore((state)=> state.logout)
+   const  logout = useAuthStore((state)=> state.logout);
+  const handleLogOut = () => {
+    logout();
+    router.push("/")
+  }
+  
 
   if(!user){
     return (<DropdownMenu>
@@ -145,7 +152,7 @@ export function UserDropdown() {
 
   {/* Section 3: Logout */}
   <DropdownMenuItem
-    onClick={logout}
+    onClick={handleLogOut}
     variant="destructive"
   >
     <LogOut className="mr-2 h-4 w-4" />

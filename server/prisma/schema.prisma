@@ -32,8 +32,8 @@ model users {
   email     String   @unique
   password  String
   role      Role     @default(USER)
-  defaultShippingAddress  Int?  @default(1)
-  defaultBillingAddress   Int?  @default(1)
+  defaultShippingAddress  Int? 
+  defaultBillingAddress   Int? 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   address   address[]

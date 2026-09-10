@@ -142,10 +142,11 @@ export const changeUserRole = async(req:AuthenticatedRequest, res:Response)=>{
                     id: Number(req.params.id)
                 },
                 data: {
-                    role: req.body
+                    role: validateData.data.role
                 }
             }
         )
+         res.json(user);
     }catch(err:any){
         throw new NotFoundException("User not found", ErrorCode.USER_NOT_FOUND)
     }

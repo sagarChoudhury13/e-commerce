@@ -22,5 +22,6 @@ export const updateUserSchema = z.object({
 })
 
 export const changeRoleSchema = z.object({
-    role : z.string()
+    // This strictly limits the input to only these exact strings
+    role: z.enum(["ADMIN", "USER"]) 
 })

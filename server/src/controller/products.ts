@@ -140,10 +140,32 @@ export const deleteProduct = async (req: Request, res: Response) => {
 
 export const listProducts = async(req:Request, res:Response)=>{
 
+  const whereClause: any = {};
+  if (req.query.tag) {
+        whereClause.tags = {
+            has: req.query.tag as string
+        };
+      }
+      if (req.query.tags) {
+        const tagsArray = (req.query.tags as string).split(',');
+        whereClause.tags = {
+            hasSome: tagsArray // Returns product if it has ANY of these tags
+            // Use `hasEvery: tagsArray` if it must have ALL of the tags
+        };
+    }
+    const sort = req.query.sort as string;
+    let orderByClause: any = { createdAt: "desc" }; 
+    
+    if (sort === "oldest") orderByClause = { createdAt: "asc" };
+    if (sort === "price_asc") orderByClause = { price: "asc" };
+    if (sort === "price_desc") orderByClause = { price: "desc" };
+
         const count = await prismaClient.products.count();
         const products = await prismaClient.products.findMany({
             skip : Number(req.query.skip || 0),
-            take: 6
+            take: Number(req.query.take || 6),
+            where : whereClause,
+            orderBy: orderByClause
         })
         res.json({count, data: products});
     
@@ -181,3 +203,4 @@ export const searchItem = async(req: AuthenticatedRequest, res: Response) =>{
     })
     res.json(retrievedProducts)
 }
+

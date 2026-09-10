@@ -20,8 +20,8 @@ enum Role {
 
 enum OrderEventStatus{
   PENDING
-  ACCEPTED
-  OUT_FOR_DELIVERY
+  PROCESSING
+  SHIPPED
   DELIVERED
   CANCELLED
 }
@@ -32,8 +32,8 @@ model users {
   email     String   @unique
   password  String
   role      Role     @default(USER)
-  defaultShippingAddress  Int?
-  defaultBillingAddress   Int?
+  defaultShippingAddress  Int?  @default(1)
+  defaultBillingAddress   Int?  @default(1)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   address   address[]

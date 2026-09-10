@@ -61,7 +61,7 @@ export function UserDropdown() {
         
         <DropdownMenuItem 
       nativeButton={false}
-      render={<Link href="/sigup" className="cursor-pointer" />}
+      render={<Link href="/signup" className="cursor-pointer" />}
     >
       <UserPlus className="mr-2 h-4 w-4" />
       <span>
@@ -105,14 +105,6 @@ export function UserDropdown() {
 
   {/* Section 1: Account Links */}
   <DropdownMenuGroup>
-    <DropdownMenuItem 
-      nativeButton={false}
-      render={<Link href="/profile" className="cursor-pointer" />}
-    >
-      <User className="mr-2 h-4 w-4" />
-      <span>Profile</span>
-    </DropdownMenuItem>
-    
     <DropdownMenuItem 
       nativeButton={false}
       render={<Link href="/orders" className="cursor-pointer" />}

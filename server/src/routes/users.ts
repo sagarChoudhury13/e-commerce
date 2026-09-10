@@ -22,6 +22,6 @@ userRoutes.put('/', [authMiddleware], errorHandler(updateDefaultAddress));
 // Use distinct paths so they don't collide with the routes above
 userRoutes.get('/all', [authMiddleware, adminMiddleware], errorHandler(listUsers));
 userRoutes.get('/:id', [authMiddleware, adminMiddleware], errorHandler(getUserById));
-userRoutes.put('/:id/role', [authMiddleware, adminMiddleware], errorHandler(changeUserRole));
+userRoutes.put('/role/:id', [authMiddleware, adminMiddleware], errorHandler(changeUserRole));
 
 export default userRoutes;

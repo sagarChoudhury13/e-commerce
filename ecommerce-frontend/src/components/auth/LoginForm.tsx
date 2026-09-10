@@ -71,7 +71,6 @@ export function LoginForm() {
     localStorage.setItem("token", token);
     await setAuthCookie(token);
     setUser(user);
-    console.log(message);
     toast.add({
       type: "success",
       title: `Hi ${user.name}!`,

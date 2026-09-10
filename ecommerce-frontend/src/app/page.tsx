@@ -1,7 +1,8 @@
 import "./globals.css";
-export const HomePage = () =>{
+import {HomePage} from "@/components/homeClient/page"
+export const Home = () =>{
   return (
-    <></>
+    <HomePage/>
   );
 }
 

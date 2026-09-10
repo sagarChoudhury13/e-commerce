@@ -165,32 +165,41 @@ export const listAllOrdersByStatus = async(req:AuthenticatedRequest, res: Respon
     }
 }
 
-export const changeStatus = async(req: AuthenticatedRequest, res: Response)=> {
-    return await prismaClient.$transaction(async(tx)=>{
-         try{
-        const order = await tx.order.update({
-            where: {
-                id: Number(req.params.id)
-            },
-            data: {
-                status: req.body.status
-            }
-        })
+export const changeStatus = async(req: AuthenticatedRequest, res: Response) => {
+    // Optional but recommended: Validate req.body.status with Zod here first!
+    try {
+        // 1. Await the result of the entire transaction
+        const updatedOrder = await prismaClient.$transaction(async (tx) => {
+            
+            const order = await tx.order.update({
+                where: {
+                    id: Number(req.params.id)
+                },
+                data: {
+                    status: req.body.status
+                }
+            });
 
-        await tx.orderEvent.create({
-            data: {
-                orderId: Number(req.params.id),
-                status: req.body.status
-            }
-        })
+            await tx.orderEvent.create({
+                data: {
+                    orderId: order.id, // Safer to use the ID from the successfully updated order
+                    status: req.body.status
+                }
+            });
 
-        res.json(order)
+            // 2. Return the data out of the transaction wrapper
+            return order; 
+        });
+        
+        // 3. Send the response OUTSIDE the transaction
+        res.json(updatedOrder);
    
-    }catch(err:any){
+    } catch (err: any) {
+        // 💡 ADD THIS LOG: This will print the EXACT reason Prisma is crashing
+        console.error("🔥 PRISMA TRANSACTION ERROR:", err);
+        
         throw new NotFoundException("No order of this id", ErrorCode.ORDER_NOT_FOUND)
     }
-    })
-    
 }
 
 export const listUserOrders = async(req: AuthenticatedRequest, res: Response)=> {

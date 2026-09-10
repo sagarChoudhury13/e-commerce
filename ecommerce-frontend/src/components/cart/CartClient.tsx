@@ -117,9 +117,11 @@ export function CartClient() {
               </div>
             </div>
             <Button variant="outline" size="sm">
+              <Link href ="/addresses" className="flex">
               {selectedAddress ? "Change Address" : (
                 <><Plus className="h-4 w-4 mr-2" /> Add Address</>
               )}
+              </Link>
             </Button>
           </CardContent>
         </Card>

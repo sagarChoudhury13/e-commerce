@@ -114,9 +114,9 @@ function OrderCard({ order }: { order: Order }) {
                   {Number(order.netAmount).toLocaleString("en-IN")}
                 </span>
               </div>
-              <Button variant="ghost" size="icon" className="shrink-0">
-                {isOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-              </Button>
+             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted/80 transition-colors">
+  {isOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+</div>
             </div>
           </div>
         </CollapsibleTrigger>

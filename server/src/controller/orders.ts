@@ -85,7 +85,8 @@ export const listOrders = async(req: AuthenticatedRequest, res: Response) =>{
         include: {
                 orderProduct: true,
                 orderEvent: true
-            }
+            },
+            orderBy : {createdAt: "desc"}            
     })
     res.json(orders?orders:"NO orders")
 }
@@ -215,7 +216,7 @@ export const listUserOrders = async(req: AuthenticatedRequest, res: Response)=> 
         const orders = await prismaClient.order.findMany({
             where: whereClause,
             skip : Number(req.query.skip) || 0,
-            take: 5
+            take: 5,
         })
     }catch(err:any){
         throw new NotFoundException('No orders found by userId', ErrorCode.ORDER_NOT_FOUND);

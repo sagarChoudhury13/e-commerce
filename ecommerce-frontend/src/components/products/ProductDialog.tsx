@@ -117,7 +117,7 @@ export function ProductDialog({ product, isOpen, onOpenChange }: ProductDialogPr
               {(product as any).description || "No description available for this product."}
             </p>
 
-            {/* Dialog Cart Controls */}
+            { user && (
             <div className="flex flex-col gap-3 mb-8">
               <Button onClick={handleBuyNow} size="lg" className="w-full h-14 text-base shadow-md">
                 <Zap className="mr-2 h-5 w-5" /> Buy Now
@@ -140,7 +140,7 @@ export function ProductDialog({ product, isOpen, onOpenChange }: ProductDialogPr
                   </Button>
                 </div>
               )}
-            </div>
+            </div>)}
 
             <div className="grid grid-cols-2 gap-4 pt-6 border-t text-xs text-muted-foreground">
               <div className="flex items-center gap-2">

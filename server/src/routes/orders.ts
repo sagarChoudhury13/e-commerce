@@ -1,7 +1,7 @@
 import {Router} from 'express';
 import { authMiddleware } from '../middleware/auth.ts';
 import { errorHandler } from '../controller/error-wrapper.ts';
-import { cancelOrder, changeStatus, createOrder, getOrderById, listAllOrdersByStatus, listOrders, listUserOrders } from '../controller/orders.ts';
+import { cancelOrder, changeStatus, createOrder, getOrderById, listAllOrdersByStatus, listUserOrders, listOrders } from '../controller/orders.ts';
 import adminMiddleware from '../middleware/admin.ts';
 
 
@@ -18,10 +18,6 @@ orderRoutes.get('/:id', [authMiddleware], errorHandler(getOrderById));
 // Cancel an order (Distinct path)
 orderRoutes.put('/:id/cancel', [authMiddleware], errorHandler(cancelOrder));
 
-
-// ==========================================
-// ADMIN ROUTES 
-// ==========================================
 
 // Change order status (Distinct path)
 orderRoutes.put('/status/:id', [authMiddleware, adminMiddleware], errorHandler(changeStatus));

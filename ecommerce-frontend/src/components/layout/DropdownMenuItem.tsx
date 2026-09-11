@@ -22,13 +22,13 @@ const CATEGORIES = [
 export function CategoryDropdown() {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger >
-        <Button variant="ghost">
-          <Grid2X2 className="h-4 w-4 " />
-          <span className=" text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2 text-sm font-medium">Categories</span>
-          <ChevronDown className="h-4 w-4 opacity-50" />
-        </Button>
-      </DropdownMenuTrigger>
+      <DropdownMenuTrigger className="outline-none">
+    <div className="hidden md:flex items-center gap-2 hover:bg-muted/50 rounded-full px-4 py-2 text-sm font-medium transition-colors">
+      <Grid2X2 className="h-4 w-4 text-muted-foreground" />
+      <span className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2 text-sm font-medium">Categories</span>
+      <ChevronDown className="h-4 w-4 opacity-50" />
+    </div>
+  </DropdownMenuTrigger>
       
       <DropdownMenuContent align="start" className="w-52 rounded-xl shadow-lg border-muted/50 mt-1">
         {CATEGORIES.map((category) => (

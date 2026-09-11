@@ -167,7 +167,7 @@ export const listProducts = async(req: Request, res: Response) => {
     
   const sort = req.query.sort as string;
   
-  // ✅ FIX 1: Turn orderBy into an array and add 'id' as a tie-breaker
+
   let orderByClause: any[] = [
     { createdAt: "desc" }, 
     { id: "desc" } // If timestamps are identical, sort by ID
@@ -177,7 +177,7 @@ export const listProducts = async(req: Request, res: Response) => {
   if (sort === "price_asc") orderByClause = [{ price: "asc" }, { id: "desc" }];                                    
   if (sort === "price_desc") orderByClause = [{ price: "desc" }, { id: "desc" }];
 
-  // ✅ FIX 2: Pass the whereClause to the count so pagination maths works during filtering
+
   const count = await prismaClient.products.count({
     where: whereClause 
   });

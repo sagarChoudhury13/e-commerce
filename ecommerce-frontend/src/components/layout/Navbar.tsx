@@ -8,6 +8,7 @@ import {SearchBar} from './Search'
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from "@/store/useAuthStore";
 import { useCartStore } from "@/store/useCartStore";
+import { CategoryDropdown } from "./DropdownMenuItem";
 
 
 export function Navbar() {
@@ -69,6 +70,7 @@ export function Navbar() {
               Products
             </Link>
           </div>
+           <CategoryDropdown />
         </div>
 
         {/* Right Side: Search, Cart, & Avatar */}
@@ -85,7 +87,7 @@ export function Navbar() {
             <ShoppingCart className="h-5 w-5" />
             <span className="hidden sm:inline">Cart</span>
           </Link>
-          {/* Avatar */}
+          
           <UserDropdown/>
         </div>
       </div>

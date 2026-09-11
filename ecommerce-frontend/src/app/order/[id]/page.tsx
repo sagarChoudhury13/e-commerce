@@ -42,7 +42,6 @@ const ORDER_STEPS = [
   { status: "PROCESSING", label: "Processing", icon: Cog },
   { status: "SHIPPED", label: "Shipped", icon: Truck },
   { status: "DELIVERED", label: "Delivered", icon: PackageCheck },
-  { status: "CANCELLED", label: "Cancelled", icon: Delete}
 ];
 
 async function getOrder(id: string): Promise<OrderResponse | null> {

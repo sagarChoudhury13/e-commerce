@@ -57,12 +57,12 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
   }
 };
 
-export const updateProduct = async (req: Request, res: Response, next:NextFunction) => {
+export const updateProduct = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const productId = Number(req.params.id);
     let updatedData = { ...req.body };
 
-    // 1. Fetch the existing product to check if it has an old image
+    // 1. Fetch the existing product
     const existingProduct = await prismaClient.products.findUnique({
       where: { id: productId }
     });
@@ -71,41 +71,52 @@ export const updateProduct = async (req: Request, res: Response, next:NextFuncti
       throw new NotFoundException("Product Unavailable", ErrorCode.PRODUCT_NOT_FOUND);
     }
 
-    // 2. Handle tags (FormData strings or arrays)
     if (updatedData.tags) {
       updatedData.tags = Array.isArray(updatedData.tags) 
         ? updatedData.tags.join(",") 
         : updatedData.tags;
     }
 
-    // If price is sent via FormData as a string, make sure it's parsed back to a number
     if (updatedData.price) {
       updatedData.price = parseFloat(updatedData.price);
     }
 
-    // 3. Handle new image upload if one was provided
+    // 2. Handle new image upload if one was provided using a Promise
     if (req.file) {
-      const uploadStream = cloudinary.uploader.upload_stream(
-        { folder: "ecommerce_products" },
-        async (error, result) => {
-          if (error) throw (error);
-          if (!result) return res.status(500).json({ message: "Upload failed" });
+      const uploadedUrl = await new Promise<string>((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          { folder: "ecommerce_products" },
+          (error, result) => {
+            // Reject the promise instead of throwing blindly
+            if (error) return reject(error); 
+            if (!result) return reject(new Error("Upload failed"));
+            
+            resolve(result.secure_url);
+          }
+        );
 
-          // Attach the new Cloudinary URL to the update payload
-          updatedData.image_url = result.secure_url;
+        // Crucial: You must end the stream with the Multer file buffer
+        uploadStream.end(req.file!.buffer);
+      });
 
-          // Save to the database after the Cloudinary upload finishes
-          const updatedProduct = await prismaClient.products.update({
-            where: { id: Number(productId) },
-            data: updatedData,
-          });
-      res.json(updatedProduct);
-  })
+      // Assign the successfully resolved URL to your data
+      updatedData.image_url = uploadedUrl;
+    }
+
+    // 3. Update the database (This now runs whether there was an image or not)
+    const updatedProduct = await prismaClient.products.update({
+      where: { id: productId },
+      data: updatedData,
+    });
+    
+    res.json(updatedProduct);
+
+  } catch (err: any) {
+    // Passing to next(err) allows your errorHandler wrapper to process it
+    // instead of crashing the Node server.
+    next(err); 
+  }
 };
-}catch(err){
-  throw new ImageFileInvalid("Image file/url invalid", ErrorCode.IMAGE_FILE_INVALID, err);
-}
-}
 
 export const deleteProduct = async (req: Request, res: Response) => {
   try {
@@ -138,37 +149,47 @@ export const deleteProduct = async (req: Request, res: Response) => {
   }
 };
 
-export const listProducts = async(req:Request, res:Response)=>{
-
+export const listProducts = async(req: Request, res: Response) => {
   const whereClause: any = {};
+  
   if (req.query.tag) {
-        whereClause.tags = {
-            has: req.query.tag as string
-        };
-      }
-      if (req.query.tags) {
-        const tagsArray = (req.query.tags as string).split(',');
-        whereClause.tags = {
-            hasSome: tagsArray // Returns product if it has ANY of these tags
-            // Use `hasEvery: tagsArray` if it must have ALL of the tags
-        };
-    }
-    const sort = req.query.sort as string;
-    let orderByClause: any = { createdAt: "desc" }; 
+    whereClause.tags = {
+      has: req.query.tag as string
+    };
+  }
+  
+  if (req.query.tags) {
+    const tagsArray = (req.query.tags as string).split(',');
+    whereClause.tags = {
+      hasSome: tagsArray
+    };
+  }
     
-    if (sort === "oldest") orderByClause = { createdAt: "asc" };
-    if (sort === "price_asc") orderByClause = { price: "asc" };                                     
-    if (sort === "price_desc") orderByClause = { price: "desc" };
+  const sort = req.query.sort as string;
+  
+  // ✅ FIX 1: Turn orderBy into an array and add 'id' as a tie-breaker
+  let orderByClause: any[] = [
+    { createdAt: "desc" }, 
+    { id: "desc" } // If timestamps are identical, sort by ID
+  ]; 
+    
+  if (sort === "oldest") orderByClause = [{ createdAt: "asc" }, { id: "asc" }];
+  if (sort === "price_asc") orderByClause = [{ price: "asc" }, { id: "desc" }];                                    
+  if (sort === "price_desc") orderByClause = [{ price: "desc" }, { id: "desc" }];
 
-        const count = await prismaClient.products.count();
-        const products = await prismaClient.products.findMany({
-            skip : Number(req.query.skip || 0),
-            take: Number(req.query.take || 6),
-            where : whereClause,
-            orderBy: orderByClause
-        })
-        res.json({count, data: products});
-    
+  // ✅ FIX 2: Pass the whereClause to the count so pagination maths works during filtering
+  const count = await prismaClient.products.count({
+    where: whereClause 
+  });
+  
+  const products = await prismaClient.products.findMany({
+    skip : Number(req.query.skip || 0),
+    take: Number(req.query.take || 6),
+    where : whereClause,
+    orderBy: orderByClause
+  });
+  
+  res.json({ count, data: products });
 }
 
 export const getProductById = async(req:Request, res:Response) =>{

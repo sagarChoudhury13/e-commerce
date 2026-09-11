@@ -12,10 +12,10 @@ export default function OrderConfirmationSkeleton() {
           <Skeleton className="w-24 h-24 rounded-full mb-6" />
           
           {/* Title Placeholder */}
-          <Skeleton className="h-10 w-3/4 max-w-[300px] mb-4" />
+          <Skeleton className="h-10 w-3/4 max-w-75 mb-4" />
           
           {/* Subtitle Placeholder */}
-          <Skeleton className="h-6 w-full max-w-[400px] mb-8" />
+          <Skeleton className="h-6 w-full max-w-100 mb-8" />
           
           {/* Button Placeholder */}
           <Skeleton className="h-10 w-48 rounded-full" />
@@ -41,7 +41,7 @@ export default function OrderConfirmationSkeleton() {
                     {Array.from({ length: 5 }).map((_, i) => (
                       <div key={i} className="relative flex items-start gap-6">
                         {/* Icon Container Skeleton */}
-                        <Skeleton className="relative z-10 flex-shrink-0 w-11 h-11 rounded-full" />
+                        <Skeleton className="relative z-10 shrink-0 w-11 h-11 rounded-full" />
                         
                         {/* Step Content Skeleton */}
                         <div className="flex flex-col pt-2.5 w-full">

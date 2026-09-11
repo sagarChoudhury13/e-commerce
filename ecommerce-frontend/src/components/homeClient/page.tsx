@@ -40,7 +40,7 @@ export function HomePage() {
 
     async function fetchHomepageData() {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products?take=4&sort=latest`);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products?take=4`);
         
         if (res.ok) {
           const data = await res.json();

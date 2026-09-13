@@ -4,13 +4,11 @@ import { useEffect, useState } from "react";
 import { 
   ArrowRight, 
   ShoppingBag, 
-  Star, 
   TrendingUp, 
   ShieldCheck, 
   Truck, 
   RefreshCcw, 
   Zap,
-  ChevronRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,6 +18,11 @@ import { useAuthStore } from "@/store/useAuthStore";
 import Link from "next/link";
 import type { Product } from "@/types";
 import { ProductDialog } from "../products/ProductDialog";
+import { Controller, useForm } from 'react-hook-form';
+import { Field, FieldLabel, FieldError } from "../ui/field";
+import type { NewsletterForm } from "@/types";
+import emailjs from "@emailjs/browser";
+import { toast } from "@/components/ui/toast";
 
 const FEATURES = [
   { icon: Truck, title: "Free Express Shipping", desc: "On all orders over ₹300" },
@@ -30,7 +33,7 @@ const FEATURES = [
 
 export function HomePage() {
   const [mounted, setMounted] = useState(false);
-  const {user} = useAuthStore();
+  const { user } = useAuthStore();
   const [trendingProducts, setTrendingProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -55,6 +58,48 @@ export function HomePage() {
 
     fetchHomepageData();
   }, []);
+
+  const form = useForm<NewsletterForm>({
+    mode: "onChange",
+    defaultValues: {
+      email: ""
+    }
+  });
+
+  async function onSubmit(data: NewsletterForm) {
+    const templateParams = {
+      name: 'SHOP XYZ',
+      title : "Welcome to the SHOP XYZ Club!",
+      message: "Thanks for subscribing! We'll be informing you about our latest offers, promotions, and giveaways.",
+      to_name : user?.name || "Guest",
+      to_email : data.email,
+      reply_to: "support@shopxyz.com"
+    }
+    
+    try {
+      await emailjs.send(
+        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
+        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID!,
+        templateParams,
+        process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!
+      );
+      
+      toast.add({
+        type: "success",
+        title: `Welcome to the SHOP XYZ Club`,
+        description: "An email has been sent as invitation."
+      });
+      
+      form.reset();
+    } catch (err: any) {
+      console.log("Email not sent", err);
+      toast.add({
+        type: "error",
+        title: "Error",
+        description: "Failed to subscribe. Please try again."
+      });
+    }
+  }
 
   if (!mounted) return null;
 
@@ -92,7 +137,7 @@ export function HomePage() {
               style={{ animationFillMode: 'both' }}
             >
               {user ? (
-                <Link href="\products">
+                <Link href="/products">
                   <Button size="lg" className="h-14 px-8 text-base group transition-all hover:scale-105">
                     <ShoppingBag className="mr-2 h-5 w-5 group-hover:animate-bounce" />
                     Start Shopping
@@ -101,12 +146,12 @@ export function HomePage() {
                 </Link>
               ) : (
                 <>
-                  <Link href="\signup"> 
+                  <Link href="/signup"> 
                     <Button size="lg" className="h-14 px-8 text-base group transition-all hover:scale-105">
                       Create a SHOP XYZ account  
                     </Button>
                   </Link>
-                  <Link href="\login">
+                  <Link href="/login">
                     <Button size="lg" variant="outline" className="h-14 px-8 text-base group transition-all hover:scale-105 bg-background/50 backdrop-blur-md">
                       Log in
                       <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
@@ -139,7 +184,7 @@ export function HomePage() {
         </div>
       </section>
     
-      {/* 4. TRENDING PRODUCTS CAROUSEL/GRID */}
+      {/* 4. TRENDING PRODUCTS */}
       <section className="bg-muted/30 py-24 border-t">
         <div className="container mx-auto px-4">
           <div className="flex flex-col items-center text-center mb-16 space-y-4">
@@ -183,7 +228,7 @@ export function HomePage() {
                       <ShoppingBag className="h-16 w-16 text-muted-foreground/30" />
                     )}
                     
-                    <div className="absolute inset-x-0 bottom-0 p-4 opacity-0 translate-y-8 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0 bg-gradient-to-t from-black/60 to-transparent">
+                    <div className="absolute inset-x-0 bottom-0 p-4 opacity-0 translate-y-8 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0 bg-linear-to-t from-black/60 to-transparent">
                       <Button className="w-full shadow-lg" size="sm">
                         <ShoppingBag className="mr-2 h-4 w-4" /> View Product
                       </Button>
@@ -205,7 +250,7 @@ export function HomePage() {
           
           <div className="mt-12 text-center">
             <Button size="lg" variant="outline" className="rounded-full px-8 hover:bg-primary hover:text-primary-foreground transition-colors">
-              <a href="/products">View All Products</a>
+              <Link href="/products">View All Products</Link>
             </Button>
           </div>
         </div>
@@ -224,17 +269,42 @@ export function HomePage() {
               Subscribe to get special offers, free giveaways, and once-in-a-lifetime deals.
             </p>
             
-            <div className="flex flex-col sm:flex-row max-w-md mx-auto gap-3">
-              <Input 
-                type="email" 
-                placeholder="Enter your email address" 
-                className="h-12 bg-zinc-900 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-primary"
+            {/* Inline Form Styling Applied Here */}
+            <form id="form-rhf" onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col sm:flex-row items-start max-w-md mx-auto gap-3 w-full">
+              <Controller
+                name="email"
+                control={form.control}
+                rules={{
+                  required: "Email is required",
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: "Invalid email address"
+                  }
+                }}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid} className="w-full flex-1 relative">
+                    <FieldLabel htmlFor={field.name} className="sr-only">Email</FieldLabel>
+                    <Input
+                      {...field}
+                      id={field.name}
+                      type="email"
+                      aria-invalid={fieldState.invalid}
+                      autoComplete="off"
+                      placeholder='Example: me@gmail.com'
+                      className={`h-12 bg-zinc-900 border-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-primary w-full ${fieldState.invalid ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} className="absolute -bottom-6 left-1 text-[0.8rem] font-medium text-red-400" />
+                    )}
+                  </Field>
+                )}
               />
-              <Button size="lg" className="h-12 shrink-0 w-full sm:w-auto">
+              <Button type="submit" form="form-rhf" size="lg" className="h-12 shrink-0 w-full sm:w-auto min-w-30">
                 Subscribe
               </Button>
-            </div>
-            <p className="text-xs text-zinc-600">
+            </form>
+
+            <p className="text-xs text-zinc-600 pt-4">
               By subscribing, you agree to our Terms of Service and Privacy Policy.
             </p>
           </div>

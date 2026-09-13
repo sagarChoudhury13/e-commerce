@@ -42,7 +42,6 @@ export const useAddressStore = create<AddressStore>((set, get) => ({
             }
 
             const data = await response.json();
-            console.log("Fetched addresses:", data);
             set({ addresses: data });
         } catch (err: any) {
             console.log(err);

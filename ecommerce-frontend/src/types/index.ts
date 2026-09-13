@@ -37,3 +37,7 @@ export interface Address {
   updatedAt: Date,
   formattedAddress: string
 }
+
+export type NewsletterForm = {
+  email: string;
+};

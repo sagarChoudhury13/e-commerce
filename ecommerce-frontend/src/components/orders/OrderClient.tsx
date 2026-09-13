@@ -60,9 +60,8 @@ interface Order {
   orderEvent: OrderEvent[];
 }
 
-// --------------------------------------------------------
-// 1. INDIVIDUAL ORDER CARD COMPONENT (The Collapsible)
-// --------------------------------------------------------
+
+
 function OrderCard({ order }: { order: Order }) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -197,9 +196,7 @@ function OrderCard({ order }: { order: Order }) {
   );
 }
 
-// --------------------------------------------------------
-// 2. MAIN ORDERS PAGE COMPONENT
-// --------------------------------------------------------
+
 export function OrdersClient() {
   const [mounted, setMounted] = useState(false);
   const [orders, setOrders] = useState<Order[]>([]);

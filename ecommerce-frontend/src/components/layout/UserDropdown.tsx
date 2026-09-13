@@ -139,14 +139,6 @@ export function UserDropdown() {
       <GitBranch className="mr-2 h-4 w-4" />
       <span>GitHub</span>
     </DropdownMenuItem>
-    
-    <DropdownMenuItem 
-      nativeButton={false}
-      render={<Link href="/support" className="cursor-pointer" />}
-    >
-      <LifeBuoy className="mr-2 h-4 w-4" />
-      <span>Support</span>
-    </DropdownMenuItem>
   </DropdownMenuGroup>
   <DropdownMenuSeparator />
 

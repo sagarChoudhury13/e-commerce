@@ -13,7 +13,7 @@ const app : Express = express();
 app.use(express.json());
 app.use(cors({
   origin: ['http://localhost:3000'], // Next.js dev server URL
-    credentials: true,                 // Allows cookies/auth headers
+    credentials: true,                 
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
 }))
@@ -50,6 +50,9 @@ export const prismaClient = new PrismaClient({ adapter }).$extends({
 
 app.use(errorMiddleware);
 
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});   
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+}
+
+export default app;

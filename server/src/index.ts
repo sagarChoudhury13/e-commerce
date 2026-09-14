@@ -12,7 +12,7 @@ const app : Express = express();
 
 app.use(express.json());
 app.use(cors({
-  origin: ['http://localhost:3000'], // Next.js dev server URL
+  origin: ['http://localhost:3000', 'https://shop-xyz-ecommerce.vercel.app/'], // Next.js dev server URL
     credentials: true,                 
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],

@@ -16,7 +16,7 @@ productsRoutes.delete('/:id', [authMiddleware, adminMiddleware], errorHandler(de
 
 productsRoutes.get('/', errorHandler(listProducts));
 
-productsRoutes.get('/search',[authMiddleware], errorHandler(searchItem))
+productsRoutes.get('/search', errorHandler(searchItem))
 
 productsRoutes.get('/:id',[authMiddleware, adminMiddleware], errorHandler(getProductById))
 

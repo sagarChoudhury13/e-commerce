@@ -71,7 +71,7 @@ export const useCartStore = create<CartStore>((set,get) => ({
         set({ items: get().items.filter(item => item.productId !== product.id) });
         return;
       }
-      const response = await fetch(`${process.env.SERVER_API_URL}/cart`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/cart`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

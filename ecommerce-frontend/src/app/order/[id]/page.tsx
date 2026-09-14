@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { toast } from "@/components/ui/toast";
+
 
 interface OrderResponse {
   id: number;
@@ -54,7 +54,7 @@ async function getOrder(id: string): Promise<OrderResponse | null> {
     }
 
     const response = await fetch(
-      `${process.env.SERVER_API_URL}/order/${id}`,
+      `${process.env.NEXT_PUBLIC_API_URL}/order/${id}`,
       {
         method: "GET",
         headers: {

@@ -28,7 +28,7 @@ export const useAddressStore = create<AddressStore>((set, get) => ({
                 set({ addresses: [] });
                 return;
             }
-            const response = await fetch(`${process.env.SERVER_API_URL}/user/address`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/address`, {
                 method: "GET",
                 headers: {
         "Content-Type": "application/json", // <-- THIS IS CRITICAL

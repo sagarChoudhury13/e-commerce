@@ -49,7 +49,7 @@ export function LoginForm() {
 
   async function onSubmit(data: z.infer<typeof loginSchema>) {
     try {
-    const loginResponse = await fetch(`${process.env.SERVER_API_URL}/auth/login`, {
+    const loginResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json", 

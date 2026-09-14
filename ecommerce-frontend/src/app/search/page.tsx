@@ -32,7 +32,7 @@ function SearchResultsContent() {
         return;
       }
         // 1. Point to /search and use ?q= instead of ?search=
-        const res = await fetch(`${process.env.SERVER_API_URL}/products/search?q=${encodeURIComponent(query)}`,{
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products/search?q=${encodeURIComponent(query)}`,{
             method: "GET",
             headers: {
           "Content-Type": "application/json",

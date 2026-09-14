@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/item";
 import { useCartStore } from "@/store/useCartStore";
 import { useErrorToast } from "@/hooks/error-toast";
-import type { Product } from "@/types/index"; // Adjust path if needed
+import type { Product } from "@/types/index"; 
 
 interface CartItemProps {
   item: { productId: number; quantity: number; products: Product }; 

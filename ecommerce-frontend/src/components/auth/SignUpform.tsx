@@ -43,7 +43,7 @@ export function SignUpForm() {
 
   async function onSubmit(data: z.infer<typeof SignUpSchema>) {
   try {
-    const signUpRes = await fetch(`${process.env.SERVER_API_URL}/auth/signup`, {
+    const signUpRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/signup`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json", 

@@ -43,7 +43,7 @@ export function HomePage() {
 
     async function fetchHomepageData() {
       try {
-        const res = await fetch(`${process.env.SERVER_API_URL}/products?take=4`);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products?take=4`);
         
         if (res.ok) {
           const data = await res.json();

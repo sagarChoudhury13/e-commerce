@@ -12,7 +12,9 @@ const app : Express = express();
 
 app.use(express.json());
 app.use(cors({
-  origin: ['http://localhost:3000', 'https://shop-xyz-ecommerce-oor7wfj46-sagar-1afd.vercel.app'], 
+  origin: ['http://localhost:3000', 
+    'https://shop-xyz-ecommerce-oor7wfj46-sagar-1afd.vercel.app', // Your previous URL
+    'https://shop-xyz-ecommerce-git-main-sagar-1afd.vercel.app'], 
     credentials: true,                 
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],

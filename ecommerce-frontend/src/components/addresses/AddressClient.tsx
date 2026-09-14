@@ -20,7 +20,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Field,
@@ -80,12 +79,7 @@ export function AddressClient() {
     // 1. Clean the payload to satisfy backend strict validation
     const payload = {
       ...data,
-      // If the user left lineTwo blank, send 'null' instead of an empty string
       lineTwo: data.lineTwo === "" ? null : data.lineTwo,
-      
-      // FIX 2 (Optional but common): 
-      // If your backend database expects 'pincode' to be an Integer, uncomment the line below:
-      // pincode: Number(data.pincode) 
     };
 
     // 2. Send the cleaned payload

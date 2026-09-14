@@ -8,8 +8,7 @@ import { useErrorToast } from '@/hooks/error-toast';
 import { useRouter } from 'next/navigation';
 import {toast} from "@/components/ui/toast"
 import { 
-  Card, 
-  CardAction, 
+  Card,  
   CardContent, 
   CardDescription, 
   CardFooter, 
@@ -44,7 +43,7 @@ export function SignUpForm() {
 
   async function onSubmit(data: z.infer<typeof SignUpSchema>) {
   try {
-    const signUpRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/signup`, {
+    const signUpRes = await fetch(`${process.env.SERVER_API_URL}/auth/signup`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json", 

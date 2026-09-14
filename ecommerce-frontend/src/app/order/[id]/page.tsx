@@ -54,7 +54,7 @@ async function getOrder(id: string): Promise<OrderResponse | null> {
     }
 
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/order/${id}`,
+      `${process.env.SERVER_API_URL}/order/${id}`,
       {
         method: "GET",
         headers: {

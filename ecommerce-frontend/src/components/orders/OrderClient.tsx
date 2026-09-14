@@ -222,7 +222,7 @@ export function OrdersClient() {
         if (!token) return;
 
         // Ensure this route matches your backend GET route for user orders
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/order`, {
+        const response = await fetch(`${process.env.SERVER_API_URL}/order`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",

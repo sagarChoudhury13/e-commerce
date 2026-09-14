@@ -49,7 +49,7 @@ export function CartClient() {
         showErrorToast(undefined, "User not authenticated");
         return;
       }
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/order`, {
+      const response = await fetch(`${process.env.SERVER_API_URL}/order`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -27,7 +27,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         throw new Error("User not authenticated");
       }
       console.log(addressId)
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user`, {
+      const response = await fetch(`${process.env.SERVER_API_URL}/user`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

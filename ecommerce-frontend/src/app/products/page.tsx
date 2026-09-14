@@ -20,7 +20,7 @@ interface FetchResponse {
 async function getProducts(skip: number): Promise<FetchResponse> {
   try {
     // Pass both skip and limit to the backend
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products?skip=${skip}`, { 
+    const res = await fetch(`${process.env.SERVER_API_URL}/products?skip=${skip}`, { 
       method : "GET",
       headers: {"Contend-Type": "application/json"},
       cache: 'no-store' 
